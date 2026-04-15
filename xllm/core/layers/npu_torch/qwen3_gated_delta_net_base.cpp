@@ -170,6 +170,12 @@ std::tuple<torch::Tensor, torch::Tensor> torch_chunk_gated_delta_rule(
   auto g_diff = g.unsqueeze(-1) - g.unsqueeze(-2);
   auto decay_mask = g_diff.tril().exp().to(torch::kFloat32);
   decay_mask = decay_mask.tril();
+
+#ifdef USE_NEO_FUSED_OPS
+  // 【替换融合算子 1】: 将 chunk 内部的双层嵌套切片和矩阵点乘融合到 Fused Linear Attention 内
+  // 消除该 O(L) 级别的 `Slice` 和 `Mul` 碎片算子
+  auto attn = xllm::kernel::fused_chunk_gated_delta_inner_attn(k_beta, key, decay_mask, mask);
+#else
   auto attn = -(torch::matmul(k_beta, key.transpose(-1, -2)) * decay_mask)
                    .masked_fill(mask, 0.0);
   for (int64_t i = 1; i < chunk_size; ++i) {
@@ -191,7 +197,7 @@ std::tuple<torch::Tensor, torch::Tensor> torch_chunk_gated_delta_rule(
                      torch::indexing::Slice(0, i)},
                     row_final.unsqueeze(-2));
   }
-
+#endif
   attn = attn +
          torch::eye(
              chunk_size,
@@ -213,6 +219,15 @@ std::tuple<torch::Tensor, torch::Tensor> torch_chunk_gated_delta_rule(
           torch::TensorOptions().dtype(torch::kBool).device(query.device())),
       1);
   int64_t num_chunks = total_sequence_length / chunk_size;
+
+#ifdef USE_NEO_FUSED_OPS
+  // 【替换融合算子 2】: FusedLinearAttention 的跨时序隐状态更新 (Cross-chunk Recurrent Update)
+  // 原生代码在此处迭代调用 `MatMul`, `Slice`, `Mul`。
+  // 通过 `xllm_ops_neo` 暴露出的 `fused_chunk_gated_delta_step` 或 `fused_linear_attention`
+  // 直接实现 UB 上的中间状态留存
+  core_attn_out = xllm::kernel::fused_chunk_gated_delta_step(
+      query, key, value, g, k_cumdecay, decay_mask, last_recurrent_state, mask, num_chunks);
+#else
   for (int64_t i = 0; i < num_chunks; ++i) {
     auto q_i = query.select(2, i);
     auto k_i = key.select(2, i);
@@ -231,6 +246,7 @@ std::tuple<torch::Tensor, torch::Tensor> torch_chunk_gated_delta_rule(
     last_recurrent_state = last_recurrent_state * g_i_last.unsqueeze(-1).exp() +
                            torch::matmul(k_g_exp, v_new);
   }
+#endif
   auto core_attn_out_shape = core_attn_out.sizes();
   std::vector<int64_t> reshape_shape = {
       core_attn_out_shape[0],

@@ -1,0 +1,38 @@
+Namespace(backend='xllm', base_url=None, host='127.0.0.1', port=18005, dataset_name='random', dataset_path='/data/fhb/workspace/benchmark/ais_bench/datasets/ShareGPT_V3_unfiltered_cleaned_split.json', model='/data/fhb/workspace/models/Qwen3.5-4B', tokenizer=None, num_prompts=1, sharegpt_output_len=None, sharegpt_context_len=None, random_input_len=32768, random_output_len=1024, random_range_ratio=1.0, request_rate=inf, max_concurrency=1, multi=False, request_rate_range='2,34,2', output_file='/data/zzy/xllm/test/exp_qwen35_32k/case2.6/result.jsonl', disable_tqdm=False, disable_stream=False, return_logprob=False, seed=1, disable_ignore_eos=False, extra_request_body=None, apply_chat_template=False, profile=False, lora_name=None, gsp_num_groups=64, gsp_prompts_per_group=16, gsp_system_prompt_len=2048, gsp_question_len=128, gsp_output_len=256)
+
+#Input tokens: 32768
+#Output tokens: 1024
+Starting initial single prompt test run...
+Initial test run completed. Starting main benchmark run...
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [01:20<00:00, 80.88s/it]100%|██████████| 1/1 [01:20<00:00, 80.89s/it]
+
+============ Serving Benchmark Result ============
+Backend:                                 xllm      
+Traffic request rate:                    inf       
+Max reqeuest concurrency:                1         
+Successful requests:                     1         
+Benchmark duration (s):                  80.89     
+Total input tokens:                      32768     
+Total generated tokens:                  1024      
+Total generated tokens (retokenized):    1024      
+Request throughput (req/s):              0.01      
+Input token throughput (tok/s):          405.12    
+Output token throughput (tok/s):         12.66     
+Total token throughput (tok/s):          417.78    
+Concurrency:                             1.00      
+----------------End-to-End Latency----------------
+Mean E2E Latency (ms):                   80882.96  
+Median E2E Latency (ms):                 80882.96  
+---------------Time to First Token----------------
+Mean TTFT (ms):                          15267.35  
+Median TTFT (ms):                        15267.35  
+P99 TTFT (ms):                           15267.35  
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          64.14     
+Median TPOT (ms):                        64.14     
+P99 TPOT (ms):                           64.14     
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           64.84     
+Median ITL (ms):                         61.17     
+P99 ITL (ms):                            73.36     
+==================================================

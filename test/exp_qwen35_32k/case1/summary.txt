@@ -1,0 +1,14 @@
+SUCCESS
+benchmark_duration_s=82.37
+output_tps=12.43
+total_tps=410.27
+mean_e2e_ms=82364.40
+mean_ttft_ms=15387.28
+server_ttft_ms=13993.0
+server_total_latency_ms=81633.2
+avg_tpot_ms=66.1
+generation_speed_tps=15.1
+prompt_tokens=32768
+generated_tokens=1024
+kv_blocks=268
+kv_capacity_gb=7.65

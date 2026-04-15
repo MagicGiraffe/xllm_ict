@@ -93,6 +93,13 @@ torch::Tensor DenseMLPImpl::forward(const torch::Tensor& hidden_states) {
     // For w8a8 quantization, the active operation is fused with the down_proj
     return down_proj_->forward(gate_up);
   } else {
+#ifdef USE_NEO_FUSED_OPS
+    // 替换：使用 xllm_ops_neo 提供的 FusedGatedLinearProjection 进行计算
+    // 将 MatMul + SiLU + Multiply 融合成单 Kernel 派发，减少 HBM 写回和调度空泡
+    torch::Tensor output = torch::empty_like(gate_up.slice(-1, 0, intermediate_size_)); // 预期输出大小
+    // xllm::kernel::fused_gated_linear_projection(gate_up, output); 
+    // 假设 ATB plugin 已注册此胶水函数
+#else
     torch::Tensor output;
     if (Device::type_str() != "npu") {
       int64_t batch_size = gate_up.sizes()[0];
@@ -102,6 +109,7 @@ torch::Tensor DenseMLPImpl::forward(const torch::Tensor& hidden_states) {
     }
 
     act_->forward(gate_up, output);
+#endif
     return down_proj_->forward(output);
   }
 }

@@ -1,0 +1,76 @@
+I20260415 12:54:05.910601 124571 xllm.cpp:147] set worker role to local worker
+I20260415 12:54:05.911332 124571 master.cpp:80] 
+I20260415 12:54:05.911348 124571 master.cpp:81]       █     █     █▄   ▄█
+I20260415 12:54:05.911356 124571 master.cpp:90] ▀█▄ ▀ █     █     █ ▀▄▀ █  version 0.9.0
+I20260415 12:54:05.911363 124571 master.cpp:91]   █▶  █     █     █     █  model   /data/fhb/workspace/models/Qwen3.5-4B
+I20260415 12:54:05.911370 124571 master.cpp:93] ▄█▀ ▄ █▄▄▄▄ █▄▄▄▄ █     █  backend llm
+I20260415 12:54:05.911377 124571 master.cpp:95] 
+I20260415 12:54:05.911383 124571 master.cpp:136] Master init options: Options: [model_path: /data/fhb/workspace/models/Qwen3.5-4B, devices: npu:0, draft_model_path: , draft_devices: npu:0, backend: llm, limit_image_per_prompt: 4, block_size: 128, max_cache_size: 0, max_memory_utilization: 0.59, enable_prefix_cache: 0, max_tokens_per_batch: 131072, max_seqs_per_batch: 1024, max_tokens_per_chunk_for_prefill: 131072, num_speculative_tokens: 0, speculative_algorithm: MTP, speculative_suffix_cache_max_depth: 64, speculative_suffix_max_spec_factor: 1, speculative_suffix_max_spec_offset: 0, speculative_suffix_min_token_prob: 0.1, speculative_suffix_max_cached_requests: -1, speculative_suffix_use_tree_spec: 0, num_request_handling_threads: 4, communication_backend: hccl, rank_tablefile: , expert_parallel_degree: 0, task_type: generate, enable_mla: 0, enable_chunked_prefill: 0, enable_prefill_sp: 0, master_node_addr: 127.0.0.1:19775, instance_role: DEFAULT, device_ip: , transfer_listen_port: 26000, nnodes: 1, node_rank: 0, enable_schedule_overlap: 0, enable_disagg_pd: 0, enable_pd_ooc: 0, kv_cache_dtype: auto, kv_cache_transfer_mode: PUSH, etcd_addr: , etcd_namespace: , enable_service_routing: 0, enable_cache_upload: 0, enable_kvcache_store: 0, prefetch_timeout: 0, prefetch_bacth_size: 2, layers_wise_copy_batchs: 4, store_protocol: tcp, store_master_server_address: , store_metadata_server: , store_local_hostname: , enable_multi_stream_parallel: 0, disable_ttft_profiling: 0, enable_forward_interruption: 0, enable_graph: 0, server_idx: 0]
+I20260415 12:54:05.911516 124571 master.cpp:123] Resolved npu_kernel_backend=TORCH for model_type=qwen3_5
+I20260415 12:54:05.911537 124571 master.cpp:176] Creating engine with devices: npu:0
+I20260415 12:54:05.911586 124571 dist_manager.cpp:185] Multi-node serving world_size = 1, each_node_ranks = 1, current node rank = 0, nnodes = 1, dp_size = 1, cp_size = 1, ep_size = 1, tp_size = 1
+I20260415 12:54:06.168385 124581 worker_server.cpp:86] Create worker server with device: 0
+I20260415 12:54:06.175742 124571 xllm_server_registry.cpp:22] Register server CollectiveServer0.
+W20260415 12:54:06.180217 124571 bthread.cpp:471] Fail to set concurrency by tag: 0, tag concurrency should be larger than old oncurrency. old concurrency: 9, new concurrency: 8
+I20260415 12:54:06.184242 124571 server.cpp:1200] Server[xllm::CollectiveService] is serving on port=19775.
+I20260415 12:54:06.184281 124571 server.cpp:1203] Check out http://liteserver-ed62:19775 in web browser.
+I20260415 12:54:06.185189 124571 xllm_server.cpp:231] CollectiveServer0 server started on address 127.0.0.1:19775, idle_timeout_sec: -1, num_threads: 8
+I20260415 12:54:07.011644 124581 xllm_server_registry.cpp:22] Register server DistributeWorkerServer0.
+W20260415 12:54:07.012528 124581 bthread.cpp:471] Fail to set concurrency by tag: 0, tag concurrency should be larger than old oncurrency. old concurrency: 9, new concurrency: 8
+I20260415 12:54:07.012830 124581 server.cpp:1200] Server[xllm::WorkerService] is serving on port=40099.
+I20260415 12:54:07.012853 124581 server.cpp:1203] Check out http://liteserver-ed62:40099 in web browser.
+I20260415 12:54:07.012863 124581 xllm_server.cpp:164] DistributeWorker started on address 192.168.0.250:40099, idle_timeout_sec: -1, num_threads: 8
+I20260415 12:54:07.012877 124581 worker_server.cpp:126] Worker 0: server address: 192.168.0.250:40099
+I20260415 12:54:07.013597 124581 worker_server.cpp:356] Worker#0 connect to 127.0.0.1:19775 success.
+I20260415 12:54:07.212471 124571 remote_worker.cpp:55] RemoteWorker Hello connected, server_address: 192.168.0.250:40099, global_rank_: 0
+I20260415 12:54:07.212800 124571 dist_manager.cpp:312] Started cluster health check thread
+I20260415 12:54:07.218008 124571 hf_model_loader.cpp:897] Success to parse image preprocess args file: /data/fhb/workspace/models/Qwen3.5-4B/preprocessor_config.json
+I20260415 12:54:07.218101 124571 hf_model_loader.cpp:986] Success to parse video preprocess args file: /data/fhb/workspace/models/Qwen3.5-4B/video_preprocessor_config.json
+I20260415 12:54:07.224264 124571 llm_engine.cpp:182] Initializing model from: /data/fhb/workspace/models/Qwen3.5-4B
+I20260415 12:54:07.224305 124571 tokenizer_factory.cpp:29] Create fast tokenizer.
+I20260415 12:54:07.916046 124571 llm_engine.cpp:209] Block info, block_size: 128, n_local_kv_heads: 4, head_dim: 256, n_layers: 32, dtype: BFloat16, kv_cache_dtype: auto
+I20260415 12:54:08.656150 124571 llm_engine.cpp:228] Tokenizer/model vocab differ: tokenizer=248070, model=248320
+I20260415 12:54:08.656276 124571 llm_engine.cpp:233] Initializing model with ModelArgs: [model_type: qwen3_5, image_embedding_mode: 0, dtype: bfloat16, hidden_size: 2560, hidden_act: silu, intermediate_size: 9216, n_layers: 32, n_encoder_layers: 0, head_dim: 256, decoder_head_dim: 0, n_heads: 16, decoder_n_heads: 0, n_kv_heads: 4, decoder_n_kv_heads: -1, vocab_size: 248320, rms_norm_eps: 1e-06, layer_norm_eps: 0, rotary_dim: 0, rope_theta: 1e+07, rope_scaling_rope_type: , rope_scaling_factor: 0, rope_scaling_low_freq_factor: 0, rope_scaling_high_freq_factor: 0, rope_scaling_original_max_position_embeddings: 0, rope_scaling_mrope_section: [], max_position_embeddings: 262144, use_absolute_position_embedding: 0, bos_token_id: 151643, eos_token_id: 248044, pad_token_id: 0, attn_scalar: 0, no_bias: 0, qkv_bias: 0, stop_token_ids: [248044, ], vision_start_token_id: 0, vision_end_token_id: 0, vision_token_id: 0, image_token_id: 0, video_token_id: 0, vision_custom_adapter: , vision_max_slice_nums: 0, mm_dropout: 0, mm_hidden_act: , mm_hidden_size: 0, mm_image_size: 0, mm_intermediate_size: 0, mm_num_channels: 0, mm_initializer_range: 0, mm_layer_norm_eps: 0, mm_num_attention_heads: 0, mm_num_beam_groups: 0, mm_num_beams: 0, mm_num_hidden_layers: 0, mm_num_return_sequences: 0, mm_output_attentions: 0, mm_output_hidden_states: 0, mm_output_scores: 0, mm_patch_size: 0, mm_projection_dim: 0, mm_spatial_merge_size: 0, mm_spatial_patch_size: 0, mm_remove_invalid_values: 0, mm_repetition_penalty: 0, mm_return_dict: 0, mm_return_dict_in_generate: 0, mm_temperature: 0, mm_tie_encoder_decoder: 0, mm_tie_word_embeddings: 0, mm_top_k: 0, mm_top_p: 0, mm_torchscript: 0, mm_use_bfloat16: 0, mm_head_dim: 0, mm_vocab_size: 0, mm_window_size: 0, mm_fullatt_block_indexes: [], mm_deepstack_visual_indexes: [], mm_tokens_per_second: 0, mm_temporal_patch_size: 0, mm_projector_type: , mm_projector_hidden_act: , mm_projector_n_layers: 0, mm_vision_feature_layer: 0, mm_vision_feature_select_strategy: , mm_image_do_center_crop: 0, mm_image_crop_height_size: 335, mm_image_crop_width_size: 335, mm_image_do_resize: 0, mm_image_resize_shortest_edge: 65536, mm_image_resample: 335, mm_image_do_rescale: 0, mm_video_do_rescale: 0, mm_image_rescale_factor: 0, mm_image_do_normalize: 0, mm_image_normalize_mean: [0.5, 0.5, 0.5, ], mm_image_normalize_std: [0.5, 0.5, 0.5, ], mm_image_shortest_edge: 65536, mm_image_longest_edge: 16777216, mm_image_min_pixels: 0, mm_image_max_pixels: 0, mm_image_patch_size: 16, mm_image_temporal_patch_size: 2, mm_image_merge_size: 2, mm_image_token_index: 0, mm_video_normalize_mean: [0.5, 0.5, 0.5, ], mm_video_normalize_std: [0.5, 0.5, 0.5, ], mm_video_shortest_edge: 4096, mm_video_longest_edge: 25165824, mm_video_patch_size: 16, mm_video_temporal_patch_size: 2, mm_video_merge_size: 2, mm_pad_token_id: 0, tie_word_embeddings: 1, use_sliding_window: 0, sliding_window: 4096, max_window_layers: 28, query_num: 0, num_speculative_tokens: 0, in_channels: -1, out_channels: -1, down_block_types: [], up_block_types: [], block_out_channels: [], layers_per_block: 1, latent_channels: -1, norm_num_groups: -1, sample_size: -1, scale_factor: 0, shift_factor: 0, mid_block_add_attention: 1, force_upcast: 1, use_quant_conv: 0, use_post_quant_conv: 0, joint_attention_dim: 0, pooled_projection_dim: 0, guidance_embeds: 1, axes_dims_rope: [], num_single_layers: 0, d_model: 0, num_layers: 0, d_kv: 0, d_ff: 0, act_fn: , is_gated_act: 1, relative_attention_num_buckets: 0, relative_attention_max_distance: 0, num_train_timesteps: 0, shift: 0, use_dynamic_shifting: 0, base_shift: 0, max_shift: 0, base_image_seq_len: 0, max_image_seq_len: 0]
+I20260415 12:54:08.656410 124571 llm_engine.cpp:234] Initializing model with quant args: QuantArgs: [quant_method: , bits: 0, moe_weight_bits: 8, group_size: 0, desc_act: 0, is_sym: 0, activation_dynamic: 1, fmt: e4m3]
+I20260415 12:54:08.656420 124571 llm_engine.cpp:235] Initializing model with tokenizer args: TokenizerArgs: [tokenizer_type: fast, add_bos_token: 0, add_eos_token: 0, bos_token: , eos_token: <|im_end|>, pad_token: <|endoftext|>, tokenizer_class: Qwen2Tokenizer, pattern: ]
+I20260415 12:54:08.656430 124571 llm_engine.cpp:236] Initializing model with random seed: 644447797
+I20260415 12:54:08.659399 124619 hf_model_loader.cpp:897] Success to parse image preprocess args file: /data/fhb/workspace/models/Qwen3.5-4B/preprocessor_config.json
+I20260415 12:54:08.659520 124619 hf_model_loader.cpp:986] Success to parse video preprocess args file: /data/fhb/workspace/models/Qwen3.5-4B/video_preprocessor_config.json
+I20260415 12:54:08.665194 124619 tokenizer_factory.cpp:29] Create fast tokenizer.
+I20260415 12:54:10.764024 124677 hf_model_loader.cpp:432] Loading model weights from /data/fhb/workspace/models/Qwen3.5-4B/model.safetensors-00001-of-00002.safetensors
+I20260415 12:54:10.764024 124678 hf_model_loader.cpp:432] Loading model weights from /data/fhb/workspace/models/Qwen3.5-4B/model.safetensors-00002-of-00002.safetensors
+I20260415 12:54:12.677209 124602 comm_channel.cpp:619] Init_model_async succeed.
+I20260415 12:54:12.685914 124571 llm_engine.cpp:407] worker #0: available memory: 19.74 GB, total memory: 29.49 GB. Using max_memory_utilization: 0.59, max_cache_size: 0.00 B
+I20260415 12:54:12.686014 124571 llm_engine.cpp:545] kv cache capacity: 7.65 GB, blocks: 269, slot_size: 4096, n_layers: 32, kv_cache_dtype: auto
+I20260415 12:54:12.686028 124571 llm_engine.cpp:625] Initializing k cache with shape: [269 128 4 256]
+I20260415 12:54:12.686038 124571 llm_engine.cpp:626] Initializing v cache with shape: [269 128 4 256]
+I20260415 12:54:12.686044 124571 llm_engine.cpp:632] GND Attention is enabled
+I20260415 12:54:12.686051 124571 llm_engine.cpp:633] Initializing conv cache with shape: [269 8192 3]
+I20260415 12:54:12.686057 124571 llm_engine.cpp:635] Initializing ssm cache with shape: [269 32 128 128]
+I20260415 12:54:12.812461 124571 llm_engine.cpp:158] Successfully initialized kv cache
+I20260415 12:54:13.679101 124571 jinja_chat_template.cpp:40] Jinja chat template init succeed.
+I20260415 12:54:14.416005 124571 xllm_server_registry.cpp:22] Register server HttpServer.
+W20260415 12:54:14.418051 124571 bthread.cpp:471] Fail to set concurrency by tag: 0, tag concurrency should be larger than old oncurrency. old concurrency: 9, new concurrency: 8
+I20260415 12:54:14.418694 124571 server.cpp:1200] Server[xllm::APIService] is serving on port=18005.
+I20260415 12:54:14.418720 124571 server.cpp:1203] Check out http://liteserver-ed62:18005 in web browser.
+I20260415 12:54:14.418730 124571 xllm_server.cpp:79] Brpc Server started on port 18005, idle_timeout_s: -1, num_threads: 8
+W20260415 12:54:14.418749 124571 controller.cpp:1606] SIGINT was installed with 1
+W20260415 12:54:14.418766 124571 controller.cpp:1616] SIGTERM was installed with 1
+I20260415 12:54:41.737475 124619 kernel_registry.cpp:140] Parsed JSON config: kernel_name=layer_norm_fwd_kernel, mix_mode=aiv, workspace_size=-1, lock_init_value=-1, lock_num=-1
+I20260415 12:54:41.737816 124619 kernel_registry.cpp:184] Successfully registered kernel 'layer_norm_fwd_kernel' (function: layer_norm_fwd_kernel)
+I20260415 12:54:56.129767 124619 kernel_registry.cpp:140] Parsed JSON config: kernel_name=_causal_conv1d_update_qwen_decode_kernel, mix_mode=aiv, workspace_size=-1, lock_init_value=-1, lock_num=-1
+I20260415 12:54:56.130033 124619 kernel_registry.cpp:184] Successfully registered kernel '_causal_conv1d_update_qwen_decode_kernel' (function: _causal_conv1d_update_qwen_decode_kernel)
+I20260415 12:54:56.130316 124619 kernel_registry.cpp:140] Parsed JSON config: kernel_name=fused_gdn_gating_decode_kernel, mix_mode=aiv, workspace_size=-1, lock_init_value=-1, lock_num=-1
+I20260415 12:54:56.130506 124619 kernel_registry.cpp:184] Successfully registered kernel 'fused_gdn_gating_decode_kernel' (function: fused_gdn_gating_decode_kernel)
+I20260415 12:55:00.404917 124728 request.cpp:92] x-request-id: , x-request-time: , request_id: cmpl-165113196944990841-CizyuhEaKgPFbhJhfQmwzU, sequence 0, max_tokens: 32, temperature: 0, finish_reason: length, prompt_tokens: 32768, generated_tokens: 32, ttft: 22841.0ms, total_latency: 27124.8ms, avg tpot: 138.2ms, generation speed: 7.5 tokens/s
+I20260415 12:56:22.292904 124729 request.cpp:92] x-request-id: , x-request-time: , request_id: cmpl-165113196944990841-9Aqjdvh7xosnrNvTq22MbG, sequence 0, max_tokens: 1024, temperature: 0, finish_reason: length, prompt_tokens: 32768, generated_tokens: 1024, ttft: 13873.0ms, total_latency: 80148.9ms, avg tpot: 64.8ms, generation speed: 15.5 tokens/s
+[ERROR] TBE Subprocess[task_distribute] raise error[], main process disappeared!
+[ERROR] TBE Subprocess[task_distribute] raise error[], main process disappeared!
+[ERROR] TBE Subprocess[task_distribute] raise error[], main process disappeared!
+[ERROR] TBE Subprocess[task_distribute] raise error[], main process disappeared!
+[ERROR] TBE Subprocess[task_distribute] raise error[], main process disappeared!
+[ERROR] TBE Subprocess[task_distribute] raise error[], main process disappeared!
+[ERROR] TBE Subprocess[task_distribute] raise error[], main process disappeared!
+[ERROR] TBE Subprocess[task_distribute] raise error[], main process disappeared!
+/usr/lib64/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 30 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

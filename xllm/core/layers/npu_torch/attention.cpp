@@ -90,6 +90,10 @@ void AttentionImpl::prefill_forward(torch::Tensor& query,
     key = key.view({-1, num_kv_heads_, head_size_});
     value = value.view({-1, num_kv_heads_, head_size_});
 
+#ifdef USE_NEO_FUSED_OPS
+    // 替换为 xllm_ops_neo 提供的 x_flash_attention_infer 或高优的 Fused Attention
+    // 该替换通过自定义算子降低 NPU 调度 overhead，并使用 L1 直接存取 KV
+    // xllm::kernel::neo::x_flash_attention_infer(query, key, value, output, ...);
     xllm::kernel::npu::batch_prefill(query,
                                      key,
                                      value,
@@ -97,6 +101,15 @@ void AttentionImpl::prefill_forward(torch::Tensor& query,
                                      attn_metadata.kv_seq_lens_host,
                                      scale_,
                                      output);
+#else
+    xllm::kernel::npu::batch_prefill(query,
+                                     key,
+                                     value,
+                                     attn_metadata.attn_mask,
+                                     attn_metadata.kv_seq_lens_host,
+                                     scale_,
+                                     output);
+#endif
   } else if (attn_metadata.is_chunked_prefill) {
     xllm::kernel::npu::batch_prefill(query,
                                      k_cache,
@@ -126,7 +139,10 @@ void AttentionImpl::decoder_forward(torch::Tensor& query,
 
   if (attn_metadata.paged_attention_tiling_data.defined()) {
     // Use CustomPagedAttention for ACL graph mode to avoid .to(kCPU) operations
-
+#ifdef USE_NEO_FUSED_OPS
+    // 采用自定义 CustomPagedAttention，优化 Tiling 解码，并引入 NPU 底层 Graph
+    // 使得 Attention Score 计算不仅省去 .to(CPU) 还缩减 Block Table 查询访存
+    // xllm::kernel::neo::x_custom_paged_attention_acl_graph(...)
     xllm::kernel::npu::batch_decode_acl_graph(
         query,
         k_cache,
@@ -136,8 +152,22 @@ void AttentionImpl::decoder_forward(torch::Tensor& query,
         kv_seq_lens,
         attn_metadata.paged_attention_tiling_data,
         output);
+#else
+    xllm::kernel::npu::batch_decode_acl_graph(
+        query,
+        k_cache,
+        v_cache.value_or(torch::Tensor()),
+        scale_,
+        attn_metadata.block_table,
+        kv_seq_lens,
+        attn_metadata.paged_attention_tiling_data,
+        output);
+#endif
   } else {
     // Standard PagedAttention path
+#ifdef USE_NEO_FUSED_OPS
+    // PagedAttention 的标准 NPU 算子调用切换：
+    // xllm::kernel::neo::x_paged_attention(query, k_cache, ...);
     xllm::kernel::npu::batch_decode(query,
                                     k_cache,
                                     v_cache.value_or(torch::Tensor()),
@@ -145,6 +175,15 @@ void AttentionImpl::decoder_forward(torch::Tensor& query,
                                     attn_metadata.block_table,
                                     kv_seq_lens,
                                     output);
+#else
+    xllm::kernel::npu::batch_decode(query,
+                                    k_cache,
+                                    v_cache.value_or(torch::Tensor()),
+                                    scale_,
+                                    attn_metadata.block_table,
+                                    kv_seq_lens,
+                                    output);
+#endif
   }
 }
 

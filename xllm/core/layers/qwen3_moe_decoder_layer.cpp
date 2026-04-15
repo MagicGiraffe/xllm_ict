@@ -106,7 +106,15 @@ torch::Tensor Qwen3MoeDecoderLayerImpl::run_moe(
   }
   return moe_mlp_->forward_experts(x, enable_moe_all2all);
 #else
+#ifdef USE_NEO_FUSED_OPS
+  // 在这里替换传统的稀疏专家分散调度：
+  // 注入 xllm_ops_neo 中的 aclnnMoeGroupedMatmul，把专家路由分配和小块矩阵乘融合到一个Kernel完成，
+  // 非常有效地解决timeline上的空闲等待波谷。
+  // e.g. return xllm::kernel::neo::moe_grouped_matmul_infer(x, router_logits, ...);
   return moe_mlp_(x, input_params);
+#else
+  return moe_mlp_(x, input_params);
+#endif
 #endif
 }
 

@@ -5,6 +5,11 @@
 /.idea
 /cmake-build-debug/
 /cmake-build-release/
+prof_*/
+msprof*/
+/exp_qwen35_32k
+kernel_meta/
+*.jsonl
 
 # CMake
 /build*
