@@ -13,6 +13,9 @@
 [submodule "third_party/smhasher"]
 	path = third_party/smhasher
 	url = https://gitcode.com/xLLM-AI/smhasher.git
+[submodule "third_party/tilelang-ascend"]
+	path = third_party/tilelang-ascend
+	url = https://gitcode.com/xLLM-AI/tilelang-ascend.git
 [submodule "third_party/xllm_ops"]
 	path = third_party/xllm_ops
 	url = https://gitcode.com/xLLM-AI/xllm_ops.git
