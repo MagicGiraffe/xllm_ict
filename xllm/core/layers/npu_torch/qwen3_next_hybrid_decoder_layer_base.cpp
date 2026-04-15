@@ -17,6 +17,9 @@ limitations under the License.
 
 #include <algorithm>
 
+#include "kernels/npu/npu_ops_api.h"
+#include "platform/device.h"
+
 namespace xllm {
 namespace layer {
 
@@ -122,16 +125,27 @@ torch::Tensor Qwen3HybridDecoderLayerImplBase::forward(
   }
 
   auto orig_dtype = x.dtype();
-  if (orig_dtype == torch::kBFloat16) {
-    x = x.to(torch::kFloat32);
-    residual = residual.to(torch::kFloat32);
-  }
-  x = x + residual;
+  if (Device::type_str() == "npu") {
+    auto org_shape = x.sizes().vec();
+    auto x_2d = x.reshape({-1, x.size(-1)});
+    auto residual_2d = residual.reshape({-1, residual.size(-1)});
+    auto gamma = post_norm_->gamma();
+    auto normed = std::get<0>(xllm::kernel::npu::add_rms_norm(
+        x_2d, residual_2d, gamma, post_norm_->eps()));
+    x = normed.view(org_shape).to(orig_dtype);
+    residual = x;
+  } else {
+    if (orig_dtype == torch::kBFloat16) {
+      x = x.to(torch::kFloat32);
+      residual = residual.to(torch::kFloat32);
+    }
+    x = x + residual;
 
-  // Post-attention norm
-  residual = x;
-  x = x.to(orig_dtype);
-  x = post_norm_(x);
+    // Post-attention norm
+    residual = x;
+    x = x.to(orig_dtype);
+    x = post_norm_(x);
+  }
 
   // MLP forward
   if (moe_mlp_) {
