@@ -126,14 +126,15 @@ torch::Tensor Qwen3HybridDecoderLayerImplBase::forward(
 
   auto orig_dtype = x.dtype();
   if (Device::type_str() == "npu") {
-    auto org_shape = x.sizes().vec();
-    auto x_2d = x.reshape({-1, x.size(-1)});
-    auto residual_2d = residual.reshape({-1, residual.size(-1)});
+    // auto org_shape = x.sizes().vec();
+    // auto x_2d = x.reshape({-1, x.size(-1)});
+    // auto residual_2d = residual.reshape({-1, residual.size(-1)});
     auto gamma = post_norm_->gamma();
-    auto normed = std::get<0>(xllm::kernel::npu::add_rms_norm(
-        x_2d, residual_2d, gamma, post_norm_->eps()));
-    x = normed.view(org_shape).to(orig_dtype);
-    residual = x;
+    auto [normed, ignored, residual_sum] = (xllm::kernel::npu::add_rms_norm(
+        x, residual, gamma, post_norm_->eps()));
+    // x = normed.view(org_shape).to(orig_dtype);
+    x = normed;
+    residual = residual_sum;
   } else {
     if (orig_dtype == torch::kBFloat16) {
       x = x.to(torch::kFloat32);
