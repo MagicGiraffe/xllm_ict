@@ -17,8 +17,7 @@ limitations under the License.
 
 #include <glog/logging.h>
 
-#include "kernels/npu/npu_ops_api.h"
-#include "platform/device.h"
+#include "xllm/core/kernels/ops_api.h"
 
 namespace xllm {
 namespace layer {
@@ -31,26 +30,13 @@ Qwen3NextRMSNormImpl::Qwen3NextRMSNormImpl(int64_t dim,
 }
 
 torch::Tensor Qwen3NextRMSNormImpl::forward(torch::Tensor& input) {
-  auto input_dtype = input.dtype();
-  auto gamma = this->gamma();
-  if (Device::type_str() == "npu") {
-    auto org_shape = input.sizes().vec();
-    auto reshaped = input.reshape({-1, norm_dim_});
-    auto output = xllm::kernel::npu::rms_norm(reshaped, gamma, eps_, "rmsnorm");
-    return output.view(org_shape).to(input_dtype);
-  }
-
-  input = input.to(torch::kFloat32);
-
-  // Calculate RMS
-  auto variance = torch::mean(torch::pow(input, 2), -1, true);
-  auto normalized = input * torch::rsqrt(variance + eps_);
-
-  // Apply weight and convert back to original dtype
-  return (normalized * gamma.to(torch::kFloat32)).to(input_dtype);
+  xllm::kernel::GemmaRMSNormParams norm_params;
+  norm_params.x = input;
+  norm_params.gamma = weight_;
+  norm_params.epsilon = eps_;
+  xllm::kernel::gemma_rms_norm(norm_params);
+  return norm_params.norm_out;
 }
-
-torch::Tensor Qwen3NextRMSNormImpl::gamma() const { return 1.0f + weight_; }
 
 void Qwen3NextRMSNormImpl::load_state_dict(const StateDict& state_dict) {
   LOAD_WEIGHT(weight);

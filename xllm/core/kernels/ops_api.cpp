@@ -18,6 +18,7 @@ limitations under the License.
 #if defined(USE_MLU)
 #include "mlu/mlu_ops_api.h"
 #elif defined(USE_NPU)
+#include "core/kernels/npu/tilelang/tilelang_ops_api.h"
 #include "npu/npu_ops_api.h"
 #include "triton_npu/torch_api/triton_ops_api.h"
 #elif defined(USE_CUDA)
@@ -613,6 +614,8 @@ torch::Tensor apply_top_k_top_p(TopKPParams& params) {
 torch::Tensor random_sample(RandomSampleParams& params) {
 #if defined(USE_MLU)
   return mlu::random_sample(params.logits);
+#elif defined(USE_CUDA)
+  return cuda::random_sample(params.logits);
 #else
   NOT_IMPLEMENTED();
 #endif
@@ -786,12 +789,18 @@ std::tuple<torch::Tensor, torch::Tensor> fp8_scaled_quantize(
 std::pair<torch::Tensor, torch::Tensor> fused_gdn_gating(
     FusedGdnGatingParams& params) {
 #if defined(USE_NPU)
-  return npu::npu_fused_gdn_gating(params.A_log,
-                                   params.a,
-                                   params.b,
-                                   params.dt_bias,
-                                   params.beta,
-                                   params.threshold);
+  return npu::tilelang::fused_gdn_gating(params.A_log,
+                                         params.a,
+                                         params.b,
+                                         params.dt_bias,
+                                         params.beta,
+                                         params.threshold);
+  // return npu::npu_fused_gdn_gating(params.A_log,
+  //                                  params.a,
+  //                                  params.b,
+  //                                  params.dt_bias,
+  //                                  params.beta,
+  //                                  params.threshold);
 #else
   NOT_IMPLEMENTED();
 #endif
@@ -955,6 +964,29 @@ std::pair<torch::Tensor, torch::Tensor> partial_rotary_embedding(
                                                  params.rotary_dim,
                                                  params.cos_sin_cache,
                                                  params.is_neox_style);
+#else
+  NOT_IMPLEMENTED();
+#endif
+}
+
+std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor>
+fused_qkvzba_split_reshape_cat(FusedQkvzbaSplitReshapeParams& params) {
+#if defined(USE_NPU)
+  return npu::npu_fused_qkvzba_split_reshape_cat(params.mixed_qkvz,
+                                                 params.mixed_ba,
+                                                 params.num_heads_qk,
+                                                 params.num_heads_v,
+                                                 params.head_qk,
+                                                 params.head_v);
+#else
+  NOT_IMPLEMENTED();
+#endif
+}
+
+void gemma_rms_norm(GemmaRMSNormParams& params) {
+#if defined(USE_NPU)
+  npu::npu_gemma_rms_norm(
+      params.x, params.gamma, params.epsilon, params.rstd_out, params.norm_out);
 #else
   NOT_IMPLEMENTED();
 #endif
