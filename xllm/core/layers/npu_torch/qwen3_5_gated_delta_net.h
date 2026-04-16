@@ -47,10 +47,7 @@ class Qwen3_5GatedDeltaNetImpl : public Qwen3NextGatedDeltaNetImpl {
   torch::Tensor merge_ba_from_split_activations(const torch::Tensor& b,
                                                 const torch::Tensor& a) const;
 
-  ColumnParallelLinear in_proj_qkv_{nullptr};
-  ColumnParallelLinear in_proj_z_{nullptr};
-  ColumnParallelLinear in_proj_b_{nullptr};
-  ColumnParallelLinear in_proj_a_{nullptr};
+  ColumnParallelLinear in_proj_all_{nullptr};
 };
 TORCH_MODULE(Qwen3_5GatedDeltaNet);
 
