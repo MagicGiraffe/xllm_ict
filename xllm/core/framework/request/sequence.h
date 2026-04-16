@@ -195,6 +195,14 @@ class Sequence final {
     embedding_block_ = std::move(embedding_block);
   }
   Block reset_embedding_block() { return std::move(embedding_block_); }
+  bool has_single_block_id() const { return has_embedding_id(); }
+  int32_t get_single_block_id() const {
+    return has_embedding_id() ? get_embedding_id() : -1;
+  }
+  void set_single_block(Block&& single_block) {
+    set_embedding_block(std::move(single_block));
+  }
+  Block reset_single_block() { return reset_embedding_block(); }
   const std::string& request_id() const { return request_id_; }
   // get input embedding
   torch::Tensor get_input_embedding() const { return input_embedding_; }
