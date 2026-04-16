@@ -426,13 +426,28 @@ torch::Tensor Qwen3GatedDeltaNetBaseImpl::forward(
     ssm_cache.index_put_({input_params.block_tables.select(1, 0)},
                          last_recurrent_state.to(ssm_cache.dtype()));
   } else {
+    // Decode: use fused NPU kernel for recurrent gated delta rule
     auto ssm_state = torch::index_select(
         ssm_cache, 0, attn_metadata.block_table.select(1, 0));
+    xllm::kernel::FusedRecurrentGatedDeltaRuleParams gdr_params;
+    gdr_params.q = processed_q;
+    gdr_params.k = processed_k;
+    gdr_params.v = processed_v;
+    gdr_params.g = g;
+    gdr_params.beta = beta;
+    // scale is already applied inside torch_recurrent_gated_delta_rule
+    // (1/sqrt(head_dim)) The NPU kernel also expects scale to be applied
+    // externally, so we leave it as nullopt
+    gdr_params.scale = std::nullopt;
+    gdr_params.initial_state = ssm_state;
+    gdr_params.inplace_final_state = true;
+    gdr_params.ssm_state_indices =
+        attn_metadata.block_table.select(1, 0).contiguous();
+    gdr_params.use_qk_l2norm_in_kernel = true;
     std::tie(core_attn_out, last_recurrent_state) =
-        torch_recurrent_gated_delta_rule(
-            processed_q, processed_k, processed_v, g, beta, ssm_state);
-    ssm_cache.index_put_({attn_metadata.block_table.select(1, 0)},
-                         last_recurrent_state.to(ssm_cache.dtype()));
+        xllm::kernel::fused_recurrent_gated_delta_rule(gdr_params);
+    // Note: ssm_cache is updated in-place by the kernel when
+    // inplace_final_state=true
   }
 
   auto z_reshaped = z.view({-1, z.size(-1)});
