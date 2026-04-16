@@ -17,6 +17,10 @@ limitations under the License.
 
 #include <algorithm>
 
+#ifdef USE_NEO_FUSED_OPS
+#include "kernels/npu/npu_ops_api.h"
+#endif
+
 namespace xllm {
 namespace layer {
 
@@ -121,6 +125,38 @@ torch::Tensor Qwen3HybridDecoderLayerImplBase::forward(
     x = linear_attention_->forward(x, attn_metadata, kv_cache, input_params);
   }
 
+#ifdef USE_NEO_FUSED_OPS
+  // 融合优化 - FusedAddRmsNorm: 将 Residual Add + Post-Attention Norm 融合
+  // 等价性分析:
+  //   原始路径 (4 步):
+  //     1. x = x.to(kFloat32)           // Cast BF16→FP32
+  //     2. residual = residual.to(kFloat32)  // Cast BF16→FP32
+  //     3. x = x + residual             // Add FP32
+  //     4. residual = x; x = x.to(orig_dtype); x = post_norm_(x)  // Norm
+  //   这产生了 2x Cast + 1x Add + 1x RmsNorm = 4 次 Kernel 下发
+  //   且中间 FP32 张量需要额外 HBM 写回 (hidden_size * 2 * sizeof(float))
+  //
+  //   融合路径 (1 步): npu::add_rms_norm(x, residual, gamma, eps)
+  //     - 在单个 Vector Core Kernel 中完成:
+  //       y = x + residual
+  //       rms = sqrt(mean(y^2) + eps)
+  //       output = gamma * y / rms
+  //     - 中间结果留存在 UB 中，不写回 HBM
+  //     - 参考 ops-nn/norm/add_rms_norm 的 AscendC 实现:
+  //       KernelAddRmsNorm<T, MODE> 支持 fp16/bf16/fp32
+  //     - ATB 中 RmsNormOperation 的 RMS_NORM_PRENORM 模式也提供相同语义
+  //   数学等价: output = RmsNorm(x + residual, gamma, eps)
+  //   性能优势: 4次 Kernel → 1次，消除 2x Cast 和中间 FP32 张量的 HBM 读写
+  //   对应 op_statistic: 减少 Add (5万次) 和 Cast 相关的 ViewCopy (2.6万次)
+  {
+    auto norm_weight = post_norm_->named_parameters()["weight"];
+    double eps = 1e-6;  // default Qwen3 RMS norm eps
+    auto [normed, residual_out, rstd] =
+        xllm::kernel::npu::add_rms_norm(x, residual, norm_weight, eps);
+    x = normed;
+    residual = residual_out;
+  }
+#else
   auto orig_dtype = x.dtype();
   if (orig_dtype == torch::kBFloat16) {
     x = x.to(torch::kFloat32);
@@ -132,6 +168,7 @@ torch::Tensor Qwen3HybridDecoderLayerImplBase::forward(
   residual = x;
   x = x.to(orig_dtype);
   x = post_norm_(x);
+#endif
 
   // MLP forward
   if (moe_mlp_) {
@@ -140,6 +177,20 @@ torch::Tensor Qwen3HybridDecoderLayerImplBase::forward(
     x = mlp_(x);
   }
 
+#ifdef USE_NEO_FUSED_OPS
+  // 融合优化 - MLP 后的 Residual Add
+  // 同理, 将 MLP 输出与 residual 的加法也使用融合方式
+  // 但由于这是最后一步且没有后续 norm，直接做 add 即可
+  {
+    auto orig_dtype2 = x.dtype();
+    if (orig_dtype2 == torch::kBFloat16) {
+      x = x.to(torch::kFloat32);
+      residual = residual.to(torch::kFloat32);
+    }
+    x = x + residual;
+    x = x.to(orig_dtype2);
+  }
+#else
   orig_dtype = x.dtype();
   if (orig_dtype == torch::kBFloat16) {
     x = x.to(torch::kFloat32);
@@ -147,6 +198,7 @@ torch::Tensor Qwen3HybridDecoderLayerImplBase::forward(
   }
   x = x + residual;
   x = x.to(orig_dtype);
+#endif
   return x;
 }
 

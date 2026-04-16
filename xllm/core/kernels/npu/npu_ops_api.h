@@ -135,4 +135,43 @@ std::pair<torch::Tensor, torch::Tensor> apply_npu_partial_rotary_embedding(
     const torch::Tensor& cos_sin_cache,
     bool is_neox_style);
 
+#ifdef USE_NEO_FUSED_OPS
+// ============================================================
+// Neo Fused Ops: 高性能融合算子替换接口
+// 这些函数在 USE_NEO_FUSED_OPS 启用时提供优化的算子实现
+// ============================================================
+
+// x_flash_attention_infer: 替换 batch_prefill 中的 ATB SelfAttention
+// 基于 xllm_ops_neo/x_flash_attention_infer 的 Catlass 框架
+// 使用 BlockMmadQK + OnlineSoftmax + BlockMmadPV pipeline
+void neo_batch_prefill(const torch::Tensor& query,
+                       const torch::Tensor& key,
+                       const torch::Tensor& value,
+                       const torch::Tensor& mask,
+                       const torch::Tensor& seq_len,
+                       float scale,
+                       torch::Tensor& output);
+
+// x_paged_attention: 替换 batch_decode 中的 ATB PagedAttention
+// 基于 xllm_ops_neo/x_attention 或 multi_latent_attention
+void neo_batch_decode(const torch::Tensor& query,
+                      const torch::Tensor& k_cache,
+                      const torch::Tensor& v_cache,
+                      float scale,
+                      const torch::Tensor& block_table,
+                      const torch::Tensor& seq_lens,
+                      torch::Tensor& output);
+
+// custom_paged_attention: 替换 batch_decode_acl_graph
+// 基于 xllm_ops_neo/atb_customize/custom_paged_attention
+void neo_batch_decode_acl_graph(const torch::Tensor& query,
+                                const torch::Tensor& k_cache,
+                                const torch::Tensor& v_cache,
+                                float scale,
+                                const torch::Tensor& block_table,
+                                const torch::Tensor& seq_lens,
+                                const torch::Tensor& tiling_data,
+                                torch::Tensor& output);
+#endif  // USE_NEO_FUSED_OPS
+
 }  // namespace xllm::kernel::npu

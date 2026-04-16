@@ -18,6 +18,10 @@ limitations under the License.
 #include "kernels/npu/npu_ops_api.h"
 #include "kernels/ops_api.h"
 
+#ifdef USE_NEO_FUSED_OPS
+#include <glog/logging.h>
+#endif
+
 DECLARE_bool(enable_chunked_prefill);
 namespace xllm {
 namespace layer {
@@ -91,16 +95,25 @@ void AttentionImpl::prefill_forward(torch::Tensor& query,
     value = value.view({-1, num_kv_heads_, head_size_});
 
 #ifdef USE_NEO_FUSED_OPS
-    // 替换为 xllm_ops_neo 提供的 x_flash_attention_infer 或高优的 Fused Attention
-    // 该替换通过自定义算子降低 NPU 调度 overhead，并使用 L1 直接存取 KV
-    // xllm::kernel::neo::x_flash_attention_infer(query, key, value, output, ...);
-    xllm::kernel::npu::batch_prefill(query,
-                                     key,
-                                     value,
-                                     attn_metadata.attn_mask,
-                                     attn_metadata.kv_seq_lens_host,
-                                     scale_,
-                                     output);
+    // 融合优化 - Prefill 阶段 Flash Attention 替换
+    // 等价性分析:
+    //   原始路径: atb::npu_flash_attention → ATB SelfAttention(PA_ENCODER)
+    //     使用 BSND 布局, TOR scale, K_CACHE_V_CACHE 配置
+    //   替换路径: xllm_ops_neo 中的 x_flash_attention_infer (基于 Catlass 框架)
+    //     - 使用 BlockMmadQK + EpilogueOnlineSoftmax + BlockMmadPV + EpilogueRescaleO
+    //     - 通过 QK-tile/KV-tile 流水线实现 Cube+Vector 核心协同
+    //     - 支持 causal mask, TND/BSND 布局
+    //     - KV 数据预取 2 次迭代，实现计算-访存 overlap
+    //   数学等价性: 两者都计算 softmax(Q·K^T/√d)·V, 结果一致
+    //   性能优势: Catlass 模板化实现避免 ATB 图调度开销，减少 Host 下发延迟
+    //   对应 op_statistic: 替换 UnpadFlashAttentionBF16NdKernel (16次, 4.7s, 16.4%)
+    xllm::kernel::npu::neo_batch_prefill(query,
+                                         key,
+                                         value,
+                                         attn_metadata.attn_mask,
+                                         attn_metadata.kv_seq_lens_host,
+                                         scale_,
+                                         output);
 #else
     xllm::kernel::npu::batch_prefill(query,
                                      key,
@@ -140,10 +153,16 @@ void AttentionImpl::decoder_forward(torch::Tensor& query,
   if (attn_metadata.paged_attention_tiling_data.defined()) {
     // Use CustomPagedAttention for ACL graph mode to avoid .to(kCPU) operations
 #ifdef USE_NEO_FUSED_OPS
-    // 采用自定义 CustomPagedAttention，优化 Tiling 解码，并引入 NPU 底层 Graph
-    // 使得 Attention Score 计算不仅省去 .to(CPU) 还缩减 Block Table 查询访存
-    // xllm::kernel::neo::x_custom_paged_attention_acl_graph(...)
-    xllm::kernel::npu::batch_decode_acl_graph(
+    // 融合优化 - Decode 阶段 ACL Graph PagedAttention
+    // 等价性分析:
+    //   原始: atb::npu_custom_paged_attention → CustomPagedAttentionParam
+    //   替换: xllm_ops_neo 的 custom_paged_attention 实现
+    //     - 使用 ATB customize API 注册的优化 Tiling 方案
+    //     - 直接在 NPU Graph 中执行，避免 .to(kCPU) 同步
+    //     - Block Table 查询利用 L1 缓存局部性优化
+    //   数学等价: 都是标准 PagedAttention: softmax(Q·K_cache^T/√d)·V_cache
+    //   对应 op_statistic: 优化 PagedAttentionMaskNdKernel 调度碎片
+    xllm::kernel::npu::neo_batch_decode_acl_graph(
         query,
         k_cache,
         v_cache.value_or(torch::Tensor()),
@@ -166,15 +185,21 @@ void AttentionImpl::decoder_forward(torch::Tensor& query,
   } else {
     // Standard PagedAttention path
 #ifdef USE_NEO_FUSED_OPS
-    // PagedAttention 的标准 NPU 算子调用切换：
-    // xllm::kernel::neo::x_paged_attention(query, k_cache, ...);
-    xllm::kernel::npu::batch_decode(query,
-                                    k_cache,
-                                    v_cache.value_or(torch::Tensor()),
-                                    scale_,
-                                    attn_metadata.block_table,
-                                    kv_seq_lens,
-                                    output);
+    // 融合优化 - Decode 阶段标准 PagedAttention
+    // 等价性分析:
+    //   原始: atb::npu_paged_attention → ATB PagedAttentionParam (BSND)
+    //   替换: xllm_ops_neo 的 x_paged_attention 或 multi_latent_attention
+    //     - x_paged_attention 使用 Catlass 框架优化 decode 阶段
+    //     - 支持分页 KV 缓存的间接寻址
+    //   数学等价: 都实现 softmax(Q·K^T/√d)·V 的 paged cache 版本
+    //   性能优势: 减少 ViewCopy (AI_VECTOR_CORE 2.6万次) 和调度间隙
+    xllm::kernel::npu::neo_batch_decode(query,
+                                        k_cache,
+                                        v_cache.value_or(torch::Tensor()),
+                                        scale_,
+                                        attn_metadata.block_table,
+                                        kv_seq_lens,
+                                        output);
 #else
     xllm::kernel::npu::batch_decode(query,
                                     k_cache,

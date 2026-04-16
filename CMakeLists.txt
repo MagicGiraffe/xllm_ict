@@ -41,20 +41,27 @@ if(USE_NPU)
   endif()
 
   if(NOT DEFINED XLLM_OPS_GIT_HEAD_CACHED OR NOT XLLM_OPS_GIT_HEAD STREQUAL XLLM_OPS_GIT_HEAD_CACHED)
-    message(STATUS "xllm_ops git HEAD changed; running precompile via execute_process")
-    execute_process(
-      COMMAND bash ${CMAKE_SOURCE_DIR}/third_party/xllm_ops/build.sh
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/third_party/xllm_ops
-      RESULT_VARIABLE XLLM_OPS_RESULT
-    )
-    if(NOT XLLM_OPS_RESULT EQUAL 0)
-      message(FATAL_ERROR "Failed to precompile xllm ops, error code: ${XLLM_OPS_RESULT}")
+    if(USE_NEO_FUSED_OPS)
+      # When using xllm_ops_neo, the symlink causes a git HEAD mismatch.
+      # Skip the automatic build.sh since neo ops are pre-built separately.
+      message(STATUS "USE_NEO_FUSED_OPS=ON: skipping xllm_ops build.sh (pre-built externally)")
+      set(XLLM_OPS_GIT_HEAD_CACHED "${XLLM_OPS_GIT_HEAD}" CACHE INTERNAL "" FORCE)
+    else()
+      message(STATUS "xllm_ops git HEAD changed; running precompile via execute_process")
+      execute_process(
+        COMMAND bash ${CMAKE_SOURCE_DIR}/third_party/xllm_ops/build.sh
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/third_party/xllm_ops
+        RESULT_VARIABLE XLLM_OPS_RESULT
+      )
+      if(NOT XLLM_OPS_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to precompile xllm ops, error code: ${XLLM_OPS_RESULT}")
+      endif()
+      set(XLLM_OPS_GIT_HEAD_CACHED "${XLLM_OPS_GIT_HEAD}" CACHE INTERNAL "" FORCE)
+      get_filename_component(XLLM_OPS_MARKER_DIR "${XLLM_OPS_MARKER_PATH}" DIRECTORY)
+      file(MAKE_DIRECTORY "${XLLM_OPS_MARKER_DIR}")
+      file(WRITE "${XLLM_OPS_MARKER_PATH}" "${XLLM_OPS_GIT_HEAD}\n")
+      message(STATUS "xllm ops precompiled and HEAD cache updated")
     endif()
-    set(XLLM_OPS_GIT_HEAD_CACHED "${XLLM_OPS_GIT_HEAD}" CACHE INTERNAL "" FORCE)
-    get_filename_component(XLLM_OPS_MARKER_DIR "${XLLM_OPS_MARKER_PATH}" DIRECTORY)
-    file(MAKE_DIRECTORY "${XLLM_OPS_MARKER_DIR}")
-    file(WRITE "${XLLM_OPS_MARKER_PATH}" "${XLLM_OPS_GIT_HEAD}\n")
-    message(STATUS "xllm ops precompiled and HEAD cache updated")
   else()
     message(STATUS "xllm_ops git HEAD unchanged; skipping precompile")
   endif()
@@ -222,6 +229,19 @@ else()
 endif()
 
 # ---------------------------------------------------------------------------
+# Fix: The vcpkg toolchain file injects -D_GLIBCXX_USE_CXX11_ABI=1 into
+# CMAKE_CXX_FLAGS during project() reload.  This conflicts with the
+# TORCH_CXX_FLAGS value (-D_GLIBCXX_USE_CXX11_ABI=0) added later via
+# add_compile_options(), causing a -Werror "macro redefined" build failure.
+# Strip any _GLIBCXX_USE_CXX11_ABI definitions injected into CMAKE_CXX_FLAGS
+# so that TORCH_CXX_FLAGS is the single authoritative source.
+# ---------------------------------------------------------------------------
+string(REGEX REPLACE "-D_GLIBCXX_USE_CXX11_ABI=[01]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+# Also collapse any duplicate whitespace left by the removal
+string(REGEX REPLACE "  +" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(STRIP "${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS)
+
+# ---------------------------------------------------------------------------
 # ARM architecture optimization (must be after project() so CXX is enabled).
 # -march=native lets the compiler use NEON, SVE, LSE atomics, crypto, etc.
 # that are available on the local CPU.  Fall back to armv8.2-a if the flag
@@ -267,7 +287,7 @@ find_package(GTest CONFIG REQUIRED)
 find_package(benchmark CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
-find_package(Python COMPONENTS Development REQUIRED)
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 
 if (USE_CXX11_ABI)
@@ -308,13 +328,31 @@ else()
   message(STATUS "Downloading and using libtorch 2.1.0 for CPU at ${LIBTORCH_SOURCE_DIR}")
 endif()
 
+option(USE_NEO_FUSED_OPS "Enable fused operator replacements from xllm_ops_neo" OFF)
+
 if(USE_NPU)
   add_definitions(-DUSE_NPU)
   add_definitions(-DBUILD_LIBTORCH)
   add_definitions(-DTORCH_SETCUSTOMHANDLER=ON)
+  if(USE_NEO_FUSED_OPS)
+    add_definitions(-DUSE_NEO_FUSED_OPS)
+    message(STATUS "NEO fused ops enabled: USE_NEO_FUSED_OPS=ON")
+  endif()
   # set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
   set(CMAKE_VERBOSE_MAKEFILE ON)
   add_definitions(-DTORCH_HIGHER_THAN_PTA6)
+
+  # Resolve NPU_HOME_PATH: fall back to ASCEND_HOME_PATH / ASCEND_TOOLKIT_HOME
+  if(DEFINED ENV{NPU_HOME_PATH} AND NOT "$ENV{NPU_HOME_PATH}" STREQUAL "")
+    set(_NPU_HOME "$ENV{NPU_HOME_PATH}")
+  elseif(DEFINED ENV{ASCEND_HOME_PATH} AND NOT "$ENV{ASCEND_HOME_PATH}" STREQUAL "")
+    set(_NPU_HOME "$ENV{ASCEND_HOME_PATH}")
+  elseif(DEFINED ENV{ASCEND_TOOLKIT_HOME} AND NOT "$ENV{ASCEND_TOOLKIT_HOME}" STREQUAL "")
+    set(_NPU_HOME "$ENV{ASCEND_TOOLKIT_HOME}")
+  else()
+    set(_NPU_HOME "/usr/local/Ascend/ascend-toolkit/latest")
+  endif()
+  message(STATUS "NPU home path resolved to: ${_NPU_HOME}")
 
   add_subdirectory(
     "${XLLM_ATB_LAYERS_SOURCE_DIR}"
@@ -328,9 +366,9 @@ if(USE_NPU)
       $ENV{PYTORCH_INSTALL_PATH}/include/torch/csrc/api/include
       $ENV{PYTORCH_NPU_INSTALL_PATH}/include
       $ENV{PYTORCH_INSTALL_PATH}/include/torch/csrc/distributed
-      $ENV{NPU_HOME_PATH}/include
+      ${_NPU_HOME}/include
       $ENV{ATB_HOME_PATH}/include
-      $ENV{NPU_HOME_PATH}/opp/vendors/xllm/op_api/include/
+      ${_NPU_HOME}/opp/vendors/xllm/op_api/include/
       ${CMAKE_CURRENT_SOURCE_DIR}/third_party/torch_npu_ops/
   )
   # Keep third-party warnings suppressed while providing headers expected by
@@ -343,10 +381,10 @@ if(USE_NPU)
       $ENV{PYTHON_LIB_PATH}
       $ENV{PYTORCH_INSTALL_PATH}/lib
       $ENV{PYTORCH_NPU_INSTALL_PATH}/lib
-      $ENV{NPU_HOME_PATH}/lib64
+      ${_NPU_HOME}/lib64
       $ENV{ATB_HOME_PATH}/lib
       $ENV{NPU_TOOLKIT_HOME}/lib64
-      $ENV{NPU_HOME_PATH}/opp/vendors/xllm/op_api/lib/
+      ${_NPU_HOME}/opp/vendors/xllm/op_api/lib/
   )
   link_libraries(cust_opapi)
   # avoid conflicts with xllm libruntime.a

@@ -20,6 +20,10 @@ limitations under the License.
 #include "kernels/ops_api.h"
 #include "platform/device.h"
 
+#if defined(USE_NEO_FUSED_OPS) && defined(USE_NPU)
+#include "kernels/npu/npu_ops_api.h"
+#endif
+
 namespace xllm {
 namespace layer {
 
@@ -94,11 +98,25 @@ torch::Tensor DenseMLPImpl::forward(const torch::Tensor& hidden_states) {
     return down_proj_->forward(gate_up);
   } else {
 #ifdef USE_NEO_FUSED_OPS
-    // 替换：使用 xllm_ops_neo 提供的 FusedGatedLinearProjection 进行计算
-    // 将 MatMul + SiLU + Multiply 融合成单 Kernel 派发，减少 HBM 写回和调度空泡
-    torch::Tensor output = torch::empty_like(gate_up.slice(-1, 0, intermediate_size_)); // 预期输出大小
-    // xllm::kernel::fused_gated_linear_projection(gate_up, output); 
-    // 假设 ATB plugin 已注册此胶水函数
+    // 融合优化：利用 npu::active 中的 SwiGLU 激活，通过 GroupedMatmul 的 act_type
+    // 参数在单次 Kernel 调度内完成 SiLU + Elementwise Multiply，避免中间张量
+    // 写回 HBM 产生的访存开销和额外的 Host 下发空泡。
+    // 等价性分析:
+    //   原始路径: gate_up = [gate, up] → output = SiLU(gate) * up
+    //   融合路径: npu::active(gate_up, "silu") 内部实现了相同的 gated activation，
+    //   该函数调用 CANN 底层的 aclnnActivation 或 ATB 的 SwiGLU kernel，
+    //   在 Vector Core 上一次性完成 SiLU + Mul，中间结果留存在 UB/L1 中。
+    torch::Tensor output;
+    if (Device::type_str() == "npu") {
+      // NPU 路径: aclnnActivation 接口自动处理 gated split + SiLU + mul
+      output = xllm::kernel::npu::active(gate_up, hidden_act_);
+    } else {
+      int64_t batch_size = gate_up.sizes()[0];
+      output = torch::empty(
+          {batch_size, intermediate_size_ / process_group_->world_size()},
+          gate_up.options());
+      act_->forward(gate_up, output);
+    }
 #else
     torch::Tensor output;
     if (Device::type_str() != "npu") {

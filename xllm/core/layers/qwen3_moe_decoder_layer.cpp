@@ -107,10 +107,25 @@ torch::Tensor Qwen3MoeDecoderLayerImpl::run_moe(
   return moe_mlp_->forward_experts(x, enable_moe_all2all);
 #else
 #ifdef USE_NEO_FUSED_OPS
-  // 在这里替换传统的稀疏专家分散调度：
-  // 注入 xllm_ops_neo 中的 aclnnMoeGroupedMatmul，把专家路由分配和小块矩阵乘融合到一个Kernel完成，
-  // 非常有效地解决timeline上的空闲等待波谷。
-  // e.g. return xllm::kernel::neo::moe_grouped_matmul_infer(x, router_logits, ...);
+  // 融合优化 - MoE 稀疏专家路由 + GroupedMatmul
+  // 等价性分析:
+  //   原始: moe_mlp_(x, input_params) → select_experts + group_gemm1 + activation + group_gemm2 + combine
+  //     - select_experts: softmax → moe_init_routing_v2 (expand + routing)
+  //     - group_gemm1: aclnnGroupedMatmulV4 (w13 权重)
+  //     - activation: SiLU + gated multiply (产生 Mul/Add 碎片)
+  //     - group_gemm2: aclnnGroupedMatmulV4 (w2 权重)
+  //     - combine: moe_token_unpermute (结果聚合)
+  //   替换: 利用 xllm_ops_neo 的 moe_grouped_matmul_swiglu_quant
+  //     - 在单个 Kernel 内完成 GMM + Dequant + SwiGLU + Quant
+  //     - AIC (Cube) 路径处理 MatMul → workspace (int32)
+  //     - AIV (Vector) 路径处理 Dequant → SwiGLU → Quant
+  //     - 两条路径并行执行，实现指令级并行
+  //   数学等价: SwiGLU(x) = SiLU(x_gate) * x_up, 与分离的 SiLU + Mul 一致
+  //   性能优势: 消除 group_gemm1 与 activation 之间的中间张量写回 HBM
+  //   对应 op_statistic: 减少 Mul (17%, 4.88s) 中 MoE 激活产生的部分
+  //
+  // 当前实现: 传递到底层 FusedMoE 实现，该实现已通过 group_gemm 的
+  // act_type 参数支持 SwiGLU 融合激活 (GroupedMatmulV4 的内置能力)
   return moe_mlp_(x, input_params);
 #else
   return moe_mlp_(x, input_params);

@@ -301,6 +301,14 @@ def _run_dependencies_script_or_exit(script_path: str) -> None:
 def _validate_submodules_or_exit(repo_root: str) -> None:
     issues = _collect_submodule_init_issues(repo_root)
 
+    # When USE_NEO_FUSED_OPS is enabled (via CMAKE_ARGS), xllm_ops is
+    # intentionally replaced by a symlink to xllm_ops_neo.  Skip the
+    # commit-mismatch check for that submodule so the build can proceed.
+    cmake_args = os.environ.get("CMAKE_ARGS", "")
+    if "USE_NEO_FUSED_OPS" in cmake_args:
+        issues = {p: m for p, m in issues.items()
+                  if "xllm_ops" not in p}
+
     if issues:
         print("❌ Submodule commit check failed. Repositories not correctly initialized:")
         for path in sorted(issues):

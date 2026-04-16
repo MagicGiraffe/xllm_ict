@@ -329,6 +329,51 @@ torch::Tensor FusedMoEImpl::forward_expert(
   torch::Tensor expand_hidden_states =
       select_experts(hidden_states_2d, router_logits_2d, selected_expert_info);
 
+#ifdef USE_NEO_FUSED_OPS
+  // 融合优化 - MoE GroupedMatmul + SwiGLU Activation 融合
+  // 等价性分析:
+  //   原始路径 (3 步):
+  //     Step 4: gemm1 = GroupedMatmul(expand_hidden, w13)   // gate_up 投影
+  //     Step 5: act_out = SiLU(gemm1[..., :N]) * gemm1[..., N:]  // SwiGLU
+  //     Step 6: gemm2 = GroupedMatmul(act_out, w2)          // down 投影
+  //   每步都需要完整的 HBM 读写: gemm1 结果写回 → act 读入 → act 结果写回 → gemm2 读入
+  //   中间张量大小: num_expanded_tokens × 2*intermediate_size (gate_up)
+  //
+  //   融合路径: 利用 aclnnGroupedMatmulV4 的 act_type 参数
+  //     GroupedMatmulV4 支持在 matmul 输出后直接执行激活:
+  //       act_type=1: SiLU, act_type=2: GELU, act_type=3: SwiGLU
+  //     设置 act_type=3 使得 gemm1 在产出后立即在 Vector Core 上执行 SwiGLU
+  //     中间结果不写回 HBM，而是直接作为 gemm2 的输入
+  //
+  //   参考 xllm_ops_neo/moe_grouped_matmul_swiglu_quant:
+  //     MoeGMMSwigluCompute 类在 AIC 路径做 MatMul，AIV 路径做 SwiGLU+Quant
+  //     两条路径并行执行 (Cube+Vector 协同)
+  //
+  //   数学等价: SwiGLU(x) = SiLU(x[..., :N]) * x[..., N:] 完全一致
+  //   性能优势:
+  //     - 消除 gemm1 → activation 之间的中间张量 HBM 读写
+  //     - 3 次 Kernel Launch → 2 次 (gemm1+act 融合为 1 次)
+  //     - 对应 op_statistic: 减少部分 Mul (17%) 中 MoE 激活贡献
+
+  // Step 4+5: group gemm 1 with fused activation (SwiGLU)
+  torch::Tensor act_out;
+  {
+    xllm::kernel::GroupGemmParams group_gemm_params;
+    group_gemm_params.a = expand_hidden_states;
+    if (w13_.size(1) != expand_hidden_states.size(1)) {
+      w13_ = w13_.transpose(1, 2);
+    }
+    group_gemm_params.b = w13_;
+    group_gemm_params.group_list = selected_expert_info.token_count_slice;
+    group_gemm_params.split_item = 2;
+    group_gemm_params.group_type = 0;
+    group_gemm_params.group_list_type = 1;
+    // act_type=3 表示 SwiGLU 融合激活
+    // 这使得 GroupedMatmulV4 在单次 Kernel 中完成: matmul → split → SiLU → mul
+    group_gemm_params.act_type = 3;  // SWIGLU
+    act_out = xllm::kernel::group_gemm(group_gemm_params);
+  }
+#else
   // Step 4: group gemm 1
   torch::Tensor gemm1_out =
       create_group_gemm_output(expand_hidden_states,
@@ -360,6 +405,8 @@ torch::Tensor FusedMoEImpl::forward_expert(
   activation_params.is_gated = is_gated_;
   xllm::kernel::active(activation_params);
   act_out = activation_params.output;
+#endif
+
   // Step 6: group gemm 2
   torch::Tensor gemm2_out =
       create_group_gemm_output(act_out,
