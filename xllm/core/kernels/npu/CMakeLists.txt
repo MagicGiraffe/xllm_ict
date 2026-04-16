@@ -1,6 +1,7 @@
 include(cc_library)
 
 add_subdirectory(xllm_ops)
+add_subdirectory(tilelang)
 
 cc_library(
   NAME
@@ -19,4 +20,6 @@ cc_library(
     rope.cpp
   DEPS
     :torch_npu_kernels
+    :tilelang_kernels
+    ascendc_ops
 )
