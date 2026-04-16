@@ -71,7 +71,7 @@ torch::Tensor Qwen3_5GatedDeltaNetImpl::merge_qkvz_from_split_activations(
   z_view =
       z_view.view({bs, seqlen, local_k_heads, num_v_heads_per_k * head_v_dim_});
 
-  return torch::cat({q, k, v, z_view}, -1).view({bs, seqlen, -1}).contiguous();
+  return torch::cat({q, k, v, z_view}, -1).view({bs, seqlen, -1});
 }
 
 torch::Tensor Qwen3_5GatedDeltaNetImpl::merge_ba_from_split_activations(
@@ -96,7 +96,7 @@ torch::Tensor Qwen3_5GatedDeltaNetImpl::merge_ba_from_split_activations(
 
   auto b_view = b.view({bs, seqlen, local_k_heads, num_v_heads_per_k});
   auto a_view = a.view({bs, seqlen, local_k_heads, num_v_heads_per_k});
-  return torch::cat({b_view, a_view}, -1).view({bs, seqlen, -1}).contiguous();
+  return torch::cat({b_view, a_view}, -1).view({bs, seqlen, -1});
 }
 
 std::pair<torch::Tensor, torch::Tensor>

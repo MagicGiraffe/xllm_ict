@@ -181,11 +181,11 @@ std::tuple<torch::Tensor, torch::Tensor> torch_chunk_gated_delta_rule(
                    .squeeze(-2)
                    .clone()
                    .contiguous();
-    auto sub = attn.slice(-2, 0, i).slice(-1, 0, i).clone().contiguous();
-    auto row_unsq = row.unsqueeze(-1).contiguous();
-    auto row_sub_mul = (row_unsq * sub).contiguous();
-    auto row_sub_sum = row_sub_mul.sum(-2).contiguous();
-    auto row_final = (row + row_sub_sum).contiguous();
+    auto sub = attn.slice(-2, 0, i).slice(-1, 0, i).clone();
+    auto row_unsq = row.unsqueeze(-1);
+    auto row_sub_mul = (row_unsq * sub);
+    auto row_sub_sum = row_sub_mul.sum(-2);
+    auto row_final = (row + row_sub_sum);
     attn.index_put_({torch::indexing::Ellipsis,
                      torch::indexing::Slice(i, i + 1),
                      torch::indexing::Slice(0, i)},
