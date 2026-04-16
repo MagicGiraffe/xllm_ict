@@ -25,4 +25,6 @@ cc_library(
     qwen3_5_decoder_layer_impl.cpp
   DEPS
     :common_layers
+    :xllm_ops
+    ascendc_ops
 )
