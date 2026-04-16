@@ -468,6 +468,19 @@ torch::Tensor Qwen3GatedDeltaNetBaseImpl::reshape_qkvz_unpad(
   return torch::cat(valid_batches, 0).contiguous();
 }
 
+torch::Tensor Qwen3GatedDeltaNetBaseImpl::get_linear_state_indices(
+    const ModelInputParams& input_params,
+    const torch::Device& device) const {
+  CHECK(!input_params.linear_state_ids.empty())
+      << "linear_state_ids must be populated for gated delta net";
+  if (input_params.linear_state_indices.defined()) {
+    return input_params.linear_state_indices;
+  }
+  return torch::tensor(
+      input_params.linear_state_ids,
+      torch::TensorOptions().dtype(torch::kInt).device(device));
+}
+
 torch::Tensor Qwen3GatedDeltaNetBaseImpl::reshape_qkvz_with_pad(
     const AttentionMetadata& attn_metadata,
     const torch::Tensor& qkvz) const {
