@@ -1,0 +1,24 @@
+Namespace(backend='xllm', base_url=None, host='127.0.0.1', port=18011, dataset_name='random', dataset_path='/data/fhb/workspace/benchmark/ais_bench/datasets/ShareGPT_V3_unfiltered_cleaned_split.json', model='/data/fhb/workspace/models/Qwen3.5-4B/', tokenizer=None, num_prompts=1, sharegpt_output_len=None, sharegpt_context_len=None, random_input_len=32768, random_output_len=1024, random_range_ratio=1.0, request_rate=inf, max_concurrency=1, multi=False, request_rate_range='2,34,2', output_file=None, disable_tqdm=False, disable_stream=True, return_logprob=False, seed=1, disable_ignore_eos=False, extra_request_body=None, apply_chat_template=False, profile=False, lora_name=None, gsp_num_groups=64, gsp_prompts_per_group=16, gsp_system_prompt_len=2048, gsp_question_len=128, gsp_output_len=256)
+
+#Input tokens: 32768
+#Output tokens: 1024
+Starting initial single prompt test run...
+Traceback (most recent call last):
+  File "/data/fhb/workspace/otherSpace/xllm_ict/test_xllm.py", line 1595, in <module>
+    run_benchmark(args)
+  File "/data/fhb/workspace/otherSpace/xllm_ict/test_xllm.py", line 1355, in run_benchmark
+    return asyncio.run(
+           ^^^^^^^^^^^^
+  File "/usr/lib64/python3.11/asyncio/runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.11/asyncio/base_events.py", line 653, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/data/fhb/workspace/otherSpace/xllm_ict/test_xllm.py", line 1026, in benchmark
+    raise ValueError(
+ValueError: Initial test run failed - Please make sure benchmark arguments are correctly specified. Error: Internal Server Error
+[ERROR] 2026-04-17-04:14:23 (PID:96473, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
