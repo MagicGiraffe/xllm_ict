@@ -1,0 +1,60 @@
+[0/2] Re-checking globbed directories...
+[1/59] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/xservice_client.cpp.o
+[2/59] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/params_utils.cpp.o
+[3/59] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/worker_client.cpp.o
+[4/59] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/mm_embed_vlm_worker_impl.cpp.o
+[5/59] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/speculative_worker_impl.cpp.o
+[6/59] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/suffix_worker_impl.cpp.o
+[7/59] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/mtp_worker_impl.cpp.o
+[8/59] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/worker_impl.cpp.o
+[9/59] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/spec_input_builder.cpp.o
+[10/59] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/eagle3_worker_impl.cpp.o
+[11/59] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/forward_shared_memory_manager.cpp.o
+[12/59] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/mix_scheduler.cpp.o
+[13/59] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/chunked_prefill_scheduler.cpp.o
+[14/59] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/zero_eviction_scheduler.cpp.o
+[15/59] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/continuous_scheduler.cpp.o
+[16/59] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/async_response_processor.cpp.o
+[17/59] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/dit_scheduler.cpp.o
+[18/59] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/disagg_pd_scheduler.cpp.o
+[19/59] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/fixed_steps_scheduler.cpp.o
+[20/59] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/prefill_only_scheduler.cpp.o
+[21/59] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/pd_ooc_scheduler.cpp.o
+[22/59] Building CXX object xllm/core/scheduler/profile/CMakeFiles/profile.dir/profile_manager.cpp.o
+[23/59] Building CXX object xllm/core/util/CMakeFiles/util.dir/utils.cpp.o
+[24/59] Linking CXX static library xllm/core/util/libutil.a
+[25/59] Linking CXX static library xllm/core/framework/xtensor/libxtensor.a
+[26/59] Linking CXX static library xllm/core/framework/kv_cache/libkv_cache.a
+[27/59] Linking CXX static library xllm/core/framework/parallel_state/libparallel_state.a
+[28/59] Linking CXX static library xllm/core/framework/request/librequest.a
+[29/59] Linking CXX static library xllm/core/framework/block/libblock.a
+[30/59] Linking CXX static library xllm/core/distributed_runtime/libworker_service.a
+[31/59] Linking CXX static library xllm/core/framework/sampling/libsampler.a
+[32/59] Linking CXX static library xllm/core/framework/eplb/libeplb.a
+[33/59] Building CXX object xllm/processors/CMakeFiles/processors.dir/clip_image_processor.cpp.o
+[34/59] Building CXX object xllm/processors/CMakeFiles/processors.dir/image_processor.cpp.o
+[35/59] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/scheduler_factory.cpp.o
+[36/59] Building CXX object xllm/processors/CMakeFiles/processors.dir/minicpmv_image_processor.cpp.o
+[37/59] Building CXX object xllm/processors/CMakeFiles/processors.dir/qwen2_vl_image_processor.cpp.o
+[38/59] Building CXX object xllm/processors/CMakeFiles/processors.dir/glm4v_image_processor.cpp.o
+[39/59] Building CXX object xllm/processors/CMakeFiles/processors.dir/pywarpper_image_processor.cpp.o
+[40/59] Linking CXX static library xllm/processors/libprocessors.a
+[41/59] Linking CXX static library xllm/core/layers/common/libcommon_layers.a
+[42/59] Linking CXX static library xllm/core/layers/npu_torch/libnpu_torch_layers.a
+[43/59] Linking CXX static library xllm/core/framework/model/libmodel.a
+[44/59] Linking CXX static library xllm/core/layers/npu/libnpu_layers.a
+[45/59] Linking CXX static library xllm/core/layers/liblayers.a
+[46/59] Building CXX object xllm/server/CMakeFiles/xllm_server.dir/xllm_server.cpp.o
+[47/59] Building CXX object xllm/server/CMakeFiles/xllm_server.dir/xllm_server_registry.cpp.o
+[48/59] Building CXX object xllm/models/CMakeFiles/models.dir/model_registry.cpp.o
+[49/59] Linking CXX static library xllm/models/libmodels.a
+[50/59] Linking CXX static library xllm/core/framework/libmodel_loader.a
+[51/59] Linking CXX static library xllm/server/libxllm_server.a
+[52/59] Linking CXX static library xllm/core/scheduler/profile/libprofile.a
+[53/59] Linking CXX static library xllm/core/scheduler/libscheduler.a
+[54/59] Linking CXX static library xllm/core/runtime/libruntime.a
+[55/59] Linking CXX static library xllm/core/framework/batch/libbatch.a
+[56/59] Linking CXX static library xllm/core/distributed_runtime/libmaster.a
+[57/59] Linking CXX static library xllm/core/distributed_runtime/libdistributed_runtime.a
+[58/59] Linking CXX static library xllm/api_service/libapi_service.a
+[59/59] Linking CXX executable /data/fhb/workspace/otherSpace/xllm_ict/build/lib.linux-aarch64-cpython-311/xllm/xllm
