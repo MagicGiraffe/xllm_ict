@@ -1,0 +1,205 @@
+[0/2] Re-checking globbed directories...
+[1/204] Building CXX object xllm/api_service/CMakeFiles/api_service.dir/rec_completion_service_impl.cpp.o
+[2/204] Building CXX object xllm/api_service/CMakeFiles/api_service.dir/completion_service_impl.cpp.o
+[3/204] Building CXX object xllm/api_service/CMakeFiles/api_service.dir/embedding_service_impl.cpp.o
+[4/204] Building CXX object xllm/api_service/CMakeFiles/api_service.dir/sample_service_impl.cpp.o
+[5/204] Building CXX object xllm/api_service/CMakeFiles/api_service.dir/api_service.cpp.o
+[6/204] Building CXX object xllm/api_service/CMakeFiles/api_service.dir/anthropic_service_impl.cpp.o
+[7/204] Building CXX object xllm/CMakeFiles/xllm.dir/xllm.cpp.o
+[8/204] Building CXX object xllm/api_service/CMakeFiles/api_service.dir/chat_service_impl.cpp.o
+[9/204] Building CXX object xllm/api_service/CMakeFiles/api_service.dir/embedding_output_builder.cpp.o
+[10/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/dit_master.cpp.o
+[11/204] Building CXX object xllm/api_service/CMakeFiles/api_service.dir/image_generation_service_impl.cpp.o
+[12/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/dit_engine.cpp.o
+[13/204] Building CXX object xllm/api_service/CMakeFiles/api_service.dir/rerank_service_impl.cpp.o
+[14/204] Building CXX object xllm/api_service/CMakeFiles/api_service.dir/qwen3_rerank_service_impl.cpp.o
+[15/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/master.cpp.o
+[16/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/llm_engine.cpp.o
+[17/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/disagg_pd_service.cpp.o
+[18/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/vlm_engine.cpp.o
+[19/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/llm_master.cpp.o
+[20/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/speculative_engine.cpp.o
+[21/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/rec_engine.cpp.o
+[22/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/vlm_master.cpp.o
+[23/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/rec_master.cpp.o
+[24/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/disagg_pd_service_impl.cpp.o
+[25/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/pd_ooc_service.cpp.o
+[26/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/remote_worker.cpp.o
+[27/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/pd_ooc_service_impl.cpp.o
+[28/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/dist_manager.cpp.o
+[29/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/worker_service.cpp.o
+[30/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/worker_service.dir/worker_service.cpp.o
+[31/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/distributed_runtime.dir/worker_server.cpp.o
+[32/204] Building CXX object xllm/core/framework/CMakeFiles/model_loader.dir/dit_model_context.cpp.o
+[33/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/master.dir/dit_master.cpp.o
+[34/204] Building CXX object xllm/core/framework/CMakeFiles/model_loader.dir/hf_model_loader.cpp.o
+[35/204] Building CXX object xllm/core/framework/CMakeFiles/model_loader.dir/model_loader.cpp.o
+[36/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/master.dir/llm_master.cpp.o
+[37/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/master.dir/master.cpp.o
+[38/204] Building CXX object xllm/core/framework/CMakeFiles/model_loader.dir/dit_model_loader.cpp.o
+[39/204] Building CXX object xllm/core/distributed_runtime/CMakeFiles/master.dir/vlm_master.cpp.o
+[40/204] Building CXX object xllm/core/framework/batch/CMakeFiles/batch.dir/rec_batch_input_builder.cpp.o
+[41/204] Building CXX object xllm/core/framework/CMakeFiles/model_context.dir/model_context.cpp.o
+[42/204] Linking CXX static library xllm/core/framework/libmodel_context.a
+[43/204] Building CXX object xllm/core/framework/batch/CMakeFiles/batch.dir/batch.cpp.o
+[44/204] Building CXX object xllm/core/framework/batch/CMakeFiles/batch.dir/batch_input_builder.cpp.o
+[45/204] Building CXX object xllm/core/framework/batch/CMakeFiles/batch.dir/mposition.cpp.o
+[46/204] Building CXX object xllm/core/framework/batch/CMakeFiles/batch.dir/onerec_batch_input_builder.cpp.o
+[47/204] Building CXX object xllm/core/framework/batch/CMakeFiles/batch.dir/rec_multi_round_batch_input_builder.cpp.o
+[48/204] Building CXX object xllm/core/framework/xtensor/CMakeFiles/xtensor.dir/page_allocator.cpp.o
+[49/204] Building CXX object xllm/core/framework/block/CMakeFiles/block.dir/hierarchy_block_manager_pool.cpp.o
+[50/204] Building CXX object xllm/core/framework/kv_cache/CMakeFiles/kv_cache.dir/embedding_cache.cpp.o
+[51/204] Building CXX object xllm/core/framework/parallel_state/CMakeFiles/parallel_state.dir/parallel_state.cpp.o
+[52/204] Building CXX object xllm/core/framework/parallel_state/CMakeFiles/parallel_state.dir/parallel_state_async.cpp.o
+[53/204] Building CXX object xllm/core/framework/request/CMakeFiles/request.dir/mm_batch_data.cpp.o
+[54/204] Building CXX object xllm/core/framework/xtensor/CMakeFiles/xtensor.dir/xtensor_dist_server.cpp.o
+[55/204] Building CXX object xllm/core/framework/xtensor/CMakeFiles/xtensor.dir/xtensor_allocator.cpp.o
+[56/204] Building CXX object xllm/core/framework/request/CMakeFiles/request.dir/mm_embedding_handler.cpp.o
+[57/204] Building CXX object xllm/core/framework/request/CMakeFiles/request.dir/dit_request_params.cpp.o
+[58/204] Building CXX object xllm/core/framework/request/CMakeFiles/request.dir/stopping_checker.cpp.o
+[59/204] Building CXX object xllm/core/framework/eplb/CMakeFiles/eplb.dir/eplb_executor.cpp.o
+[60/204] Building CXX object xllm/core/layers/CMakeFiles/layers.dir/qwen2_vision_layer.cpp.o
+[61/204] Building CXX object xllm/core/framework/eplb/CMakeFiles/eplb.dir/eplb_manager.cpp.o
+[62/204] Building CXX object xllm/core/layers/CMakeFiles/layers.dir/qwen2_decoder_layer.cpp.o
+[63/204] Building CXX object xllm/core/layers/CMakeFiles/layers.dir/qwen2_5_vision_layer.cpp.o
+[64/204] Building CXX object xllm/core/layers/CMakeFiles/layers.dir/qwen3_vision_layer.cpp.o
+[65/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/multi_head_attention.cpp.o
+[66/204] Building CXX object xllm/core/layers/CMakeFiles/layers.dir/qwen3_moe_decoder_layer.cpp.o
+[67/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_word_embedding_impl.cpp.o
+[68/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_pos_embedding_impl.cpp.o
+[69/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_lm_head_impl.cpp.o
+[70/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_qwen2_vision_encoder_layer_impl.cpp.o
+[71/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_qwen2dot5_vision_encoder_layer_impl.cpp.o
+[72/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_qwen3_vision_encoder_layer_impl.cpp.o
+[73/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_block_copy_impl.cpp.o
+[74/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_qwen3_moe_decoder_layer_impl.cpp.o
+[75/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_base_layer.cpp.o
+[76/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_column_parallel_linear_impl.cpp.o
+[77/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_glm4_moe_decoder_layer.cpp.o
+[78/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_glm4_vision_encoder_layer_impl.cpp.o
+[79/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_glm4_moe_lite_decoder_layer.cpp.o
+[80/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_deepseek_v2_decoder_layer_impl.cpp.o
+[81/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_llama_decoder_layer_impl.cpp.o
+[82/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_deepseek_v32_decoder_layer_impl.cpp.o
+[83/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_qwen2_decoder_layer_impl.cpp.o
+[84/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_onerec_block_layer_impl.cpp.o
+[85/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_qwen3_decoder_layer_impl.cpp.o
+[86/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_eagle3_decoder_layer_impl.cpp.o
+[87/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_rms_norm_impl.cpp.o
+[88/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_glm4_decoder_layer_impl.cpp.o
+[89/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/__/common/rotary_embedding_util.cpp.o
+[90/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/npu_siglip_encoder_layer_impl.cpp.o
+[91/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/qwen3_decoder_loader.cpp.o
+[92/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/qwen2_decoder_loader.cpp.o
+[93/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/qwen3_moe_decoder_loader.cpp.o
+[94/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/word_embedding_loader.cpp.o
+[95/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/eagle3_decoder_loader.cpp.o
+[96/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/lm_head_loader.cpp.o
+[97/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/column_parallel_linear_loader.cpp.o
+[98/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/deepseek_v2_decoder_loader.cpp.o
+[99/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/deepseek_v32_decoder_loader.cpp.o
+[100/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/glm4_decoder_loader.cpp.o
+[101/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/glm4_moe_decoder_loader.cpp.o
+[102/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/glm4_moe_lite_decoder_loader.cpp.o
+[103/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/glm4_vision_encoder_loader.cpp.o
+[104/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/llama_decoder_loader.cpp.o
+[105/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/qwen2_vision_encoder_loader.cpp.o
+[106/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/qwen3_vision_encoder_loader.cpp.o
+[107/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/qwen2dot5_vision_encoder_loader.cpp.o
+[108/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/rms_norm_loader.cpp.o
+[109/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/siglip_encoder_loader.cpp.o
+[110/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/base_loader.cpp.o
+[111/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/base_manual_loader.cpp.o
+[112/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/qwen2_decoder_manual_loader.cpp.o
+[113/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/qwen3_decoder_manual_loader.cpp.o
+[114/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/word_embedding_manual_loader.cpp.o
+[115/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/rms_norm_manual_loader.cpp.o
+[116/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/eagle3_decoder_manual_loader.cpp.o
+[117/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/lm_head_manual_loader.cpp.o
+[118/204] Building CXX object xllm/core/layers/npu/CMakeFiles/npu_layers.dir/loader/rolling_load_manager.cpp.o
+[119/204] Building CXX object xllm/core/layers/npu_torch/CMakeFiles/npu_torch_layers.dir/fused_moe.cpp.o
+[120/204] Building CXX object xllm/core/layers/npu_torch/CMakeFiles/npu_torch_layers.dir/qwen3_gated_delta_net_base.cpp.o
+[121/204] Building CXX object xllm/core/layers/npu_torch/CMakeFiles/npu_torch_layers.dir/qwen3_next_attention.cpp.o
+[122/204] Building CXX object xllm/core/layers/npu_torch/CMakeFiles/npu_torch_layers.dir/qwen3_next_gated_delta_net.cpp.o
+[123/204] Building CXX object xllm/core/layers/npu_torch/CMakeFiles/npu_torch_layers.dir/qwen3_next_hybrid_decoder_layer_base.cpp.o
+[124/204] Building CXX object xllm/core/layers/npu_torch/CMakeFiles/npu_torch_layers.dir/qwen3_5_gated_delta_net.cpp.o
+[125/204] Building CXX object xllm/core/layers/npu_torch/CMakeFiles/npu_torch_layers.dir/qwen3_next_decoder_layer_impl.cpp.o
+[126/204] Building CXX object xllm/core/layers/npu_torch/CMakeFiles/npu_torch_layers.dir/qwen3_5_decoder_layer_impl.cpp.o
+[127/204] Building CXX object xllm/core/layers/common/CMakeFiles/common_layers.dir/qwen2_attention.cpp.o
+[128/204] Building CXX object xllm/core/layers/common/CMakeFiles/common_layers.dir/rms_norm.cpp.o
+[129/204] Building CXX object xllm/core/layers/common/CMakeFiles/common_layers.dir/qwen2_vision_attention.cpp.o
+[130/204] Building CXX object xllm/core/layers/common/CMakeFiles/common_layers.dir/rotary_embedding.cpp.o
+[131/204] Building CXX object xllm/core/layers/common/CMakeFiles/common_layers.dir/rotary_embedding_util.cpp.o
+[132/204] Building CXX object xllm/core/layers/common/CMakeFiles/common_layers.dir/dense_mlp.cpp.o
+[133/204] Building CXX object xllm/core/layers/common/CMakeFiles/common_layers.dir/linear.cpp.o
+[134/204] Building CXX object xllm/core/layers/common/CMakeFiles/common_layers.dir/word_embedding_impl.cpp.o
+[135/204] Building CXX object xllm/core/layers/common/CMakeFiles/common_layers.dir/moe_fused_topk.cpp.o
+[136/204] Building CXX object xllm/core/layers/common/CMakeFiles/common_layers.dir/attention_metadata_builder.cpp.o
+[137/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/executor.cpp.o
+[138/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/executor_impl_factory.cpp.o
+[139/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/dit_executor.cpp.o
+[140/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/vlm_executor_impl.cpp.o
+[141/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/base_executor_impl.cpp.o
+[142/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/acl_graph_executor_impl.cpp.o
+[143/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/dit_worker.cpp.o
+[144/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/worker.cpp.o
+[145/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/worker_impl.cpp.o
+[146/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/llm_worker_impl.cpp.o
+[147/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/vlm_worker_impl.cpp.o
+[148/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/embed_vlm_worker_impl.cpp.o
+[149/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/embed_worker_impl.cpp.o
+[150/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/xservice_client.cpp.o
+[151/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/params_utils.cpp.o
+[152/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/rec_worker_impl.cpp.o
+[153/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/mm_embed_vlm_worker_impl.cpp.o
+[154/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/worker_client.cpp.o
+[155/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/suffix_worker_impl.cpp.o
+[156/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/mtp_worker_impl.cpp.o
+[157/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/speculative_worker_impl.cpp.o
+[158/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/forward_shared_memory_manager.cpp.o
+[159/204] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/mix_scheduler.cpp.o
+[160/204] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/zero_eviction_scheduler.cpp.o
+[161/204] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/chunked_prefill_scheduler.cpp.o
+[162/204] Building CXX object xllm/core/runtime/CMakeFiles/runtime.dir/eagle3_worker_impl.cpp.o
+[163/204] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/continuous_scheduler.cpp.o
+[164/204] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/dit_scheduler.cpp.o
+[165/204] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/fixed_steps_scheduler.cpp.o
+[166/204] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/prefill_only_scheduler.cpp.o
+[167/204] Building CXX object xllm/core/scheduler/profile/CMakeFiles/profile.dir/profile_manager.cpp.o
+[168/204] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/disagg_pd_scheduler.cpp.o
+[169/204] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/pd_ooc_scheduler.cpp.o
+[170/204] Building CXX object xllm/core/util/CMakeFiles/util.dir/utils.cpp.o
+[171/204] Linking CXX static library xllm/core/util/libutil.a
+[172/204] Linking CXX static library xllm/core/framework/xtensor/libxtensor.a
+[173/204] Linking CXX static library xllm/core/framework/kv_cache/libkv_cache.a
+[174/204] Linking CXX static library xllm/core/framework/parallel_state/libparallel_state.a
+[175/204] Linking CXX static library xllm/core/framework/request/librequest.a
+[176/204] Linking CXX static library xllm/core/framework/block/libblock.a
+[177/204] Linking CXX static library xllm/core/distributed_runtime/libworker_service.a
+[178/204] Linking CXX static library xllm/core/framework/eplb/libeplb.a
+[179/204] Building CXX object xllm/processors/CMakeFiles/processors.dir/clip_image_processor.cpp.o
+[180/204] Building CXX object xllm/processors/CMakeFiles/processors.dir/image_processor.cpp.o
+[181/204] Building CXX object xllm/core/scheduler/CMakeFiles/scheduler.dir/scheduler_factory.cpp.o
+[182/204] Building CXX object xllm/processors/CMakeFiles/processors.dir/minicpmv_image_processor.cpp.o
+[183/204] Building CXX object xllm/processors/CMakeFiles/processors.dir/qwen2_vl_image_processor.cpp.o
+[184/204] Building CXX object xllm/processors/CMakeFiles/processors.dir/glm4v_image_processor.cpp.o
+[185/204] Building CXX object xllm/processors/CMakeFiles/processors.dir/pywarpper_image_processor.cpp.o
+[186/204] Linking CXX static library xllm/processors/libprocessors.a
+[187/204] Linking CXX static library xllm/core/layers/common/libcommon_layers.a
+[188/204] Linking CXX static library xllm/core/layers/npu_torch/libnpu_torch_layers.a
+[189/204] Linking CXX static library xllm/core/layers/npu/libnpu_layers.a
+[190/204] Linking CXX static library xllm/core/layers/liblayers.a
+[191/204] Building CXX object xllm/server/CMakeFiles/xllm_server.dir/xllm_server.cpp.o
+[192/204] Building CXX object xllm/server/CMakeFiles/xllm_server.dir/xllm_server_registry.cpp.o
+[193/204] Building CXX object xllm/models/CMakeFiles/models.dir/model_registry.cpp.o
+[194/204] Linking CXX static library xllm/models/libmodels.a
+[195/204] Linking CXX static library xllm/core/framework/libmodel_loader.a
+[196/204] Linking CXX static library xllm/server/libxllm_server.a
+[197/204] Linking CXX static library xllm/core/scheduler/profile/libprofile.a
+[198/204] Linking CXX static library xllm/core/scheduler/libscheduler.a
+[199/204] Linking CXX static library xllm/core/runtime/libruntime.a
+[200/204] Linking CXX static library xllm/core/framework/batch/libbatch.a
+[201/204] Linking CXX static library xllm/core/distributed_runtime/libmaster.a
+[202/204] Linking CXX static library xllm/core/distributed_runtime/libdistributed_runtime.a
+[203/204] Linking CXX static library xllm/api_service/libapi_service.a
+[204/204] Linking CXX executable /data/fhb/workspace/otherSpace/xllm_ict/build/lib.linux-aarch64-cpython-311/xllm/xllm
