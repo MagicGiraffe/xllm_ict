@@ -128,6 +128,9 @@ void proto_to_forward_input(const proto::ForwardInput* pb_forward_input,
   std::vector<int32_t> embedding_ids =
       std::vector<int32_t>(pb_forward_input->embedding_ids().begin(),
                            pb_forward_input->embedding_ids().end());
+  std::vector<int32_t> linear_state_ids =
+      std::vector<int32_t>(pb_forward_input->linear_state_ids().begin(),
+                           pb_forward_input->linear_state_ids().end());
   std::vector<int32_t> extra_token_ids =
       std::vector<int32_t>(pb_forward_input->extra_token_ids().begin(),
                            pb_forward_input->extra_token_ids().end());
@@ -228,6 +231,9 @@ void proto_to_forward_input(const proto::ForwardInput* pb_forward_input,
   input_params.dp_global_token_nums = std::move(dp_global_token_nums);
   input_params.dp_is_decode = std::move(dp_is_decode);
   input_params.embedding_ids = std::move(embedding_ids);
+  input_params.linear_state_ids = std::move(linear_state_ids);
+  input_params.linear_state_indices =
+      torch::tensor(input_params.linear_state_ids, tensor_options);
   input_params.request_ids = std::move(request_ids);
   input_params.extra_token_ids = std::move(extra_token_ids);
   input_params.mtp_shifted_token_ids =
@@ -506,6 +512,8 @@ void forward_input_to_proto(const RawForwardInput& inputs,
 
   ADD_VECTOR_TO_PROTO(pb_forward_input->mutable_embedding_ids(),
                       inputs.embedding_ids);
+  ADD_VECTOR_TO_PROTO(pb_forward_input->mutable_linear_state_ids(),
+                      inputs.linear_state_ids);
   ADD_VECTOR_TO_PROTO(pb_forward_input->mutable_request_ids(),
                       inputs.request_ids);
   ADD_VECTOR_TO_PROTO(pb_forward_input->mutable_extra_token_ids(),

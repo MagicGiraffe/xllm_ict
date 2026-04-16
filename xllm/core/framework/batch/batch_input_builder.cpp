@@ -237,6 +237,9 @@ void BatchInputBuilder::process_sequences_multithreaded() {
     state_.embedding_ids.insert(state_.embedding_ids.end(),
                                 state.embedding_ids.begin(),
                                 state.embedding_ids.end());
+    state_.linear_state_ids.insert(state_.linear_state_ids.end(),
+                                   state.linear_state_ids.begin(),
+                                   state.linear_state_ids.end());
     state_.request_ids.insert(state_.request_ids.end(),
                               state.request_ids.begin(),
                               state.request_ids.end());
@@ -399,13 +402,16 @@ void BatchInputBuilder::extract_tokens_and_positions(Sequence* sequence,
     }
   }
 
+  // sequence-scoped id for linear state cache (conv/ssm)
+  state.linear_state_ids.emplace_back(sequence->get_single_block_id());
+
   // Add extra token id
   int32_t extra_token_id = -1;
   if (n_tokens == seq_len) {
     // last chunk of prefill and decode
     // add -1 as extra token id
     state.extra_token_ids.emplace_back(-1);
-    state.embedding_ids.emplace_back(sequence->get_embedding_id());
+    state.embedding_ids.emplace_back(sequence->get_single_block_id());
     state.request_ids.emplace_back(sequence->request_id());
   } else {
     extra_token_id = token_ids[seq_len];
@@ -611,6 +617,11 @@ ForwardInput BatchInputBuilder::state_to_forward_input() {
   }
 
   input_params.embedding_ids = std::move(state_.embedding_ids);
+  input_params.linear_state_ids = std::move(state_.linear_state_ids);
+  if (!input_params.linear_state_ids.empty()) {
+    input_params.linear_state_indices =
+        torch::tensor(input_params.linear_state_ids, torch::kInt);
+  }
   input_params.request_ids = std::move(state_.request_ids);
   input_params.extra_token_ids = std::move(state_.extra_token_ids);
   if (!state_.mtp_shifted_token_ids.empty()) {
@@ -695,6 +706,7 @@ RawForwardInput BatchInputBuilder::state_to_raw_forward_input() {
       std::move(state_.paged_kv_last_page_len);
 
   raw_forward_input.embedding_ids = std::move(state_.embedding_ids);
+  raw_forward_input.linear_state_ids = std::move(state_.linear_state_ids);
   raw_forward_input.request_ids = std::move(state_.request_ids);
   raw_forward_input.extra_token_ids = std::move(state_.extra_token_ids);
   raw_forward_input.mtp_shifted_token_ids =

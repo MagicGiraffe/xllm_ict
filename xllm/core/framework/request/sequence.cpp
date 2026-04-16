@@ -583,6 +583,7 @@ void Sequence::reset() {
   timer_.reset();
   is_timeout_set_ = false;
   volatile_num_prompt_tokens_ = num_tokens_;
+  embedding_block_ = Block();
 }
 
 void Sequence::add_shared_kv_blocks(std::vector<Block>&& blocks) {
