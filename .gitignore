@@ -58,3 +58,6 @@ compile_commands.json
 /local
 /logs
 /log
+
+# not needed submodule
+third_party/tilelang-ascend
