@@ -32,6 +32,8 @@ class Qwen3NextRMSNormImpl : public torch::nn::Module {
   torch::Tensor forward(torch::Tensor& input);
 
   void load_state_dict(const StateDict& state_dict);
+  torch::Tensor gamma() const;
+  double eps() const { return eps_; }
 
  private:
   DEFINE_WEIGHT(weight);
