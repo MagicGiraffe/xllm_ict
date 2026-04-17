@@ -126,6 +126,7 @@ torch::Tensor Qwen3HybridDecoderLayerImplBase::forward(
 
   auto orig_dtype = x.dtype();
   if (Device::type_str() == "npu") {
+    auto gamma = post_norm_->gamma();
     auto [normed, ignored, residual_sum] = (xllm::kernel::npu::add_rms_norm(
         x, residual, gamma, post_norm_->eps()));
     // x = normed.view(org_shape).to(orig_dtype);

@@ -1,0 +1,167 @@
+/* Copyright 2025 The xLLM Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://github.com/jd-opensource/xllm/blob/main/LICENSE
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================*/
+#include "npu_process_group.h"
+
+#include <torch_npu/csrc/core/npu/NPUCachingAllocator.h>
+
+#include <c10d/ProcessGroup.hpp>
+#include <c10d/TCPStore.hpp>
+#include <torch_npu/csrc/distributed/ProcessGroupHCCL.hpp>
+
+#include "platform/device.h"
+
+namespace {
+inline bool is_npu(const torch::Tensor& tensor) {
+  if (!tensor.defined()) {
+    return false;
+  }
+  return tensor.device().is_privateuseone();
+}
+
+torch::Tensor flatten_for_scatter_gather(std::vector<torch::Tensor>& tensors) {
+  auto& t = tensors[0];
+  std::vector<int64_t> sizes{static_cast<int64_t>(tensors.size())};
+  sizes.insert(sizes.end(), t.sizes().begin(), t.sizes().end());
+  return torch::empty(sizes, t.options());
+}
+
+HcclDataType to_hccl_data_type(const torch::Tensor& input) {
+  const auto type = input.scalar_type();
+  switch (type) {
+    case torch::kFloat:
+      return HCCL_DATA_TYPE_FP32;
+    case torch::kHalf:
+      return HCCL_DATA_TYPE_FP16;
+    case torch::kDouble:
+      return HCCL_DATA_TYPE_FP64;
+    case torch::kLong:
+      return HCCL_DATA_TYPE_INT64;
+    case torch::kInt:
+      return HCCL_DATA_TYPE_INT32;
+    case torch::kChar:
+      return HCCL_DATA_TYPE_INT8;
+    case torch::kByte:
+      return HCCL_DATA_TYPE_UINT8;
+    case torch::kBool:
+      return HCCL_DATA_TYPE_UINT8;
+    case torch::kBFloat16:
+      return HCCL_DATA_TYPE_BFP16;
+    default:
+      LOG(FATAL) << "Unconvertible HCCL type " << type;
+  }
+}
+
+void check_input(torch::Tensor input) {
+  CHECK(is_npu(input)) << "input should be npu tensor";
+  CHECK(input.is_contiguous()) << "input should be contiguous";
+  CHECK(!input.is_sparse()) << "input have to be npu dense tensor";
+}
+}  // namespace
+
+namespace xllm {
+
+ProcessGroupImpl::ProcessGroupImpl(int32_t global_rank,
+                                   int32_t world_size,
+                                   int32_t rank_size,
+                                   int32_t port,
+                                   bool trans,
+                                   const std::string& host,
+                                   const std::string& group_name,
+                                   const torch::Device& device)
+    : ProcessGroup(global_rank, world_size, device),
+      comm_stream_(c10_npu::getNPUStreamFromPool(device.index())) {
+  c10::intrusive_ptr<c10d_npu::ProcessGroupHCCL::Options> hccl_pg_options =
+      c10d_npu::ProcessGroupHCCL::Options::create();
+  hccl_pg_options->group_id = group_name;
+
+  int32_t rank = global_rank;
+  if (world_size != rank_size) {
+    auto [local_rank, group_ranks] =
+        get_group_rank(world_size, global_rank, rank_size, trans);
+    std::vector<uint32_t> uint32_ranks;
+    for (auto rank : group_ranks) {
+      uint32_ranks.push_back(static_cast<uint32_t>(rank));
+    }
+    hccl_pg_options->global_ranks_in_group = uint32_ranks;
+    rank = local_rank;
+  }
+  auto store = create_tcp_store(host, port, rank);
+  pg_ = std::make_unique<c10d_npu::ProcessGroupHCCL>(
+      store, rank, rank_size, hccl_pg_options);
+}
+
+ProcessGroupImpl::ProcessGroupImpl(int32_t global_rank,
+                                   int32_t local_rank,
+                                   const std::vector<int32_t>& group_ranks,
+                                   int32_t world_size,
+                                   int32_t rank_size,
+                                   int32_t port,
+                                   const std::string& host,
+                                   const std::string& group_name,
+                                   const torch::Device& device)
+    : ProcessGroup(global_rank, world_size, device),
+      comm_stream_(c10_npu::getNPUStreamFromPool(device.index())) {
+  c10::intrusive_ptr<c10d_npu::ProcessGroupHCCL::Options> hccl_pg_options =
+      c10d_npu::ProcessGroupHCCL::Options::create();
+  hccl_pg_options->group_id = group_name;
+  if (world_size != rank_size) {
+    std::vector<uint32_t> uint32_ranks;
+    for (auto rank : group_ranks) {
+      uint32_ranks.push_back(static_cast<uint32_t>(rank));
+    }
+    hccl_pg_options->global_ranks_in_group = uint32_ranks;
+  }
+
+  if (FLAGS_dit_debug_print) {
+    std::stringstream ranks_ss;
+    ranks_ss << "Group : [" << group_ranks[0];
+    for (size_t i = 1; i < group_ranks.size(); i++) {
+      ranks_ss << ", " << group_ranks[i];
+    }
+    ranks_ss << "]" << std::endl;
+
+    LOG(INFO) << "Creating HccLProcessGroup for " << group_name
+              << " group, with global rank " << global_rank << ", local rank"
+              << local_rank << ", with port " << host << ":" << port
+              << ", rank_size is " << rank_size << ", world_size is "
+              << world_size
+              << ", the following ranks should share the same port, "
+              << ranks_ss.str();
+  }
+
+  auto store = create_tcp_store(host, port, local_rank);
+  pg_ = std::make_unique<c10d_npu::ProcessGroupHCCL>(
+      store, local_rank, rank_size, hccl_pg_options);
+}
+
+// Destructor.
+ProcessGroupImpl::~ProcessGroupImpl() {
+  if (pg_) {
+    pg_->shutdown();
+  } else {
+    HCCLCHECK(HcclCommDestroy(comm_));
+  }
+  Device::empty_cache(device().index());
+}
+
+ProcessGroupImpl::ProcessGroupImpl(int rank,
+                                   int world_size,
+                                   const torch::Device& device,
+                                   HcclComm comm)
+    : ProcessGroup(rank, world_size, device),
+      comm_(comm),
+      comm_stream_(c10_npu::getNPUStreamFromPool(device.index())) {}
+
+}  // namespace xllm

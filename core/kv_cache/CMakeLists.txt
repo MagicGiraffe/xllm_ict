@@ -1,0 +1,40 @@
+include(cc_binary)
+include(cc_library)
+include(cc_test)
+
+
+cc_library(
+  NAME
+    kv_cache
+  HDRS
+    embedding_cache.h
+    kv_cache.h
+    kv_cache_event.h
+  SRCS
+    embedding_cache.cpp 
+    kv_cache.cpp
+  DEPS
+    :common
+    glog::glog
+    torch
+    $<$<BOOL:${USE_NPU}>:torch_npu>
+)
+
+cc_test(
+  NAME
+    embedding_cache_test
+  SRCS
+    embedding_cache_test.cpp
+  DEPS
+    :xllm_server
+    :kv_cache
+    $<$<BOOL:${USE_NPU}>:xllm_server>
+    GTest::gtest_main
+)
+target_link_libraries(embedding_cache_test
+                      PUBLIC
+                      Python::Python
+                      $<$<BOOL:${USE_NPU}>:ascendcl>
+                      $<$<BOOL:${USE_NPU}>:hccl>
+                      $<$<BOOL:${USE_NPU}>:c_sec>
+                      $<$<BOOL:${USE_NPU}>:nnopbase>)
