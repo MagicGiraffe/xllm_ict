@@ -17,6 +17,9 @@ limitations under the License.
 
 #include <glog/logging.h>
 
+#include "kernels/npu/npu_ops_api.h"
+#include "platform/device.h"
+
 namespace xllm {
 namespace layer {
 

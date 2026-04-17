@@ -17,6 +17,9 @@ limitations under the License.
 
 #include <algorithm>
 
+#include "kernels/npu/npu_ops_api.h"
+#include "platform/device.h"
+
 namespace xllm {
 namespace layer {
 
@@ -122,24 +125,31 @@ torch::Tensor Qwen3HybridDecoderLayerImplBase::forward(
   }
 
   auto orig_dtype = x.dtype();
-  if (orig_dtype == torch::kBFloat16) {
-    x = x.to(torch::kFloat32);
-    residual = residual.to(torch::kFloat32);
-  }
-  x = x + residual;
-
-  // Post-attention norm
-  residual = x;
-  x = x.to(orig_dtype);
-  x = post_norm_(x);
-
-  // MLP forward
-  if (moe_mlp_) {
-    x = moe_mlp_(x, input_params);
+  if (Device::type_str() == "npu") {
+    auto [normed, ignored, residual_sum] = (xllm::kernel::npu::add_rms_norm(
+        x, residual, gamma, post_norm_->eps()));
+    // x = normed.view(org_shape).to(orig_dtype);
+    x = normed;
+    residual = residual_sum;
   } else {
-    x = mlp_(x);
-  }
+    if (orig_dtype == torch::kBFloat16) {
+      x = x.to(torch::kFloat32);
+      residual = residual.to(torch::kFloat32);
+    }
+    x = x + residual;
 
+    // Post-attention norm
+    residual = x;
+    x = x.to(orig_dtype);
+    x = post_norm_(x);
+
+    // MLP forward
+    if (moe_mlp_) {
+      x = moe_mlp_(x, input_params);
+    } else {
+      x = mlp_(x);
+    }
+  }
   orig_dtype = x.dtype();
   if (orig_dtype == torch::kBFloat16) {
     x = x.to(torch::kFloat32);
