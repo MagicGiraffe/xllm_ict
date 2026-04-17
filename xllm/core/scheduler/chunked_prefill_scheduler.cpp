@@ -740,8 +740,18 @@ bool ChunkedPrefillScheduler::allocate_blocks_for(
     max_handle_num_tokens += min_speculative_tokens_required_;
   }
 
-  // make sure the sequence proceeds forward
-  CHECK_GT(max_handle_num_tokens, kv_cache_tokens_num);
+  // When token budget is exhausted at a boundary (e.g. very long prefill +
+  // decode transition), this sequence may have no progress in current round.
+  // Return false so caller can reschedule instead of hard-crashing the server.
+  if (max_handle_num_tokens <= kv_cache_tokens_num) {
+    *current_step_handle_tokens = 0;
+    VLOG(1) << "No token progress in current scheduling round, request_id="
+            << sequence->request_id()
+            << ", kv_cache_tokens_num=" << kv_cache_tokens_num
+            << ", token_budget=" << token_budget
+            << ", sequence_num_tokens=" << sequence->num_tokens();
+    return false;
+  }
 
   // the actual allocated tokens is the difference between the total
   // number of tokens and the number of tokens already processed
