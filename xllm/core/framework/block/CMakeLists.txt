@@ -58,6 +58,6 @@ if(USE_NPU)
   target_link_libraries(block_test PRIVATE Folly::folly OpenSSL::SSL OpenSSL::Crypto protobuf::libprotobuf c_sec)
   # Resolve static link order between xtensor and xllm_server for this test target.
   target_link_libraries(block_test PRIVATE
-    "$<LINK_GROUP:RESCAN,xtensor,xllm_server>")
+    "$<LINK_GROUP:RESCAN,xtensor,xllm_server,distributed_runtime>")
   add_dependencies(block_test brpc-static)
 endif()
