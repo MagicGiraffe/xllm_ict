@@ -360,8 +360,12 @@ torch::Tensor Qwen3GatedDeltaNetBaseImpl::forward(
   auto device = mixed_qkv.device();
   auto conv_weight = conv1d_->weight();
   auto linear_state_indices = get_linear_state_indices(input_params, device);
+  // Qwen3.5 chunked prefill should reuse prefill kernels (conv/gating/chunk
+  // rule) instead of decode recurrent path.
+  const bool is_prefill_like =
+      attn_metadata.is_prefill || attn_metadata.is_chunked_prefill;
 
-  if (attn_metadata.is_prefill) {
+  if (is_prefill_like) {
     torch::Tensor conv_state =
         (seq_len < conv_kernel_size_ - 1)
             ? torch::pad(mixed_qkv, {0, conv_kernel_size_ - 1 - seq_len})
@@ -392,7 +396,7 @@ torch::Tensor Qwen3GatedDeltaNetBaseImpl::forward(
   }
 
   // Compute gated delta net decay and beta terms.
-  if (attn_metadata.is_prefill) {
+  if (is_prefill_like) {
     beta = torch::sigmoid(b);
     torch::Tensor A_log_exp = A_log_.exp();
     torch::Tensor a_float = a.to(torch::kFloat32);
@@ -421,7 +425,7 @@ torch::Tensor Qwen3GatedDeltaNetBaseImpl::forward(
     processed_k = processed_k.repeat_interleave(repeat_times, 2);
   }
   // Apply chunked or recurrent gated-delta attention and update caches.
-  if (attn_metadata.is_prefill) {
+  if (is_prefill_like) {
     std::tie(core_attn_out, last_recurrent_state) =
         torch_chunk_gated_delta_rule(
             processed_q, processed_k, processed_v, g, beta);
@@ -454,7 +458,7 @@ torch::Tensor Qwen3GatedDeltaNetBaseImpl::forward(
 torch::Tensor Qwen3GatedDeltaNetBaseImpl::reshape_qkvz_unpad(
     const AttentionMetadata& attn_metadata,
     const torch::Tensor& padded_qkvz) const {
-  if (!attn_metadata.is_prefill) {
+  if (!(attn_metadata.is_prefill || attn_metadata.is_chunked_prefill)) {
     return padded_qkvz;
   }
   std::vector<torch::Tensor> valid_batches;
@@ -489,7 +493,7 @@ torch::Tensor Qwen3GatedDeltaNetBaseImpl::reshape_qkvz_with_pad(
   int64_t bs = attn_metadata.q_seq_lens.size(0);
   int64_t max_len = attn_metadata.max_query_len;
   const auto& start_loc = attn_metadata.q_seq_lens;
-  if (!attn_metadata.is_prefill) {
+  if (!(attn_metadata.is_prefill || attn_metadata.is_chunked_prefill)) {
     return qkvz.view({bs, -1, qkvz.size(-1)});
   }
   std::vector<torch::Tensor> batches;
