@@ -17,7 +17,7 @@ LAUNCH_SCRIPT="${LAUNCH_SCRIPT:-${ROOT_DIR}/launch_xllm.sh}"
 TPS_SCRIPT="${TPS_SCRIPT:-${ROOT_DIR}/tps_test.sh}"
 LOG_FILE="${LOG_FILE:-${ROOT_DIR}/log/node_0.log}"
 
-PORT="${PORT:-18011}"
+START_PORT="${START_PORT:-18011}"
 MASTER_NODE_ADDR="${MASTER_NODE_ADDR:-127.0.0.1:19752}"
 ASCEND_RT_VISIBLE_DEVICES="${ASCEND_RT_VISIBLE_DEVICES:-5}"
 MAX_MEMORY_UTILIZATION="${MAX_MEMORY_UTILIZATION:-0.59}"
@@ -54,7 +54,7 @@ run_one_tier() {
 
   export ASCEND_RT_VISIBLE_DEVICES
   export MASTER_NODE_ADDR
-  export PORT
+  export START_PORT
   export MAX_MEMORY_UTILIZATION
   export MAX_TOKENS_PER_BATCH
   export MAX_SEQS_PER_BATCH
@@ -67,7 +67,7 @@ run_one_tier() {
   bash "${LAUNCH_SCRIPT}" >/dev/null 2>&1
   sleep 5
 
-  if ! curl -s "http://127.0.0.1:${PORT}/v1/models" >/dev/null; then
+  if ! curl -s "http://127.0.0.1:${START_PORT}/v1/models" >/dev/null; then
     status="LAUNCH_FAIL"
   else
     set +e
@@ -80,7 +80,7 @@ run_one_tier() {
       --random-input-len "${INPUT_LEN}" \
       --random-output-len "${OUTPUT_LEN}" \
       --host 127.0.0.1 \
-      --port "${PORT}" \
+      --port "${START_PORT}" \
       --disable-stream \
       --dataset-path /data/fhb/workspace/benchmark/ais_bench/datasets/ShareGPT_V3_unfiltered_cleaned_split.json \
       --model "${MODEL_PATH}" >"${out_file}" 2>&1
