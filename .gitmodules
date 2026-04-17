@@ -37,7 +37,7 @@
 [submodule "third_party/torch_npu_ops"]
 	path = third_party/torch_npu_ops
 	url = https://gitcode.com/xLLM-AI/torch_npu_ops.git
-	fetchRecurseSubmodules = false
+	fetchRecurseSubmodules = true
 [submodule "third_party/cutlass"]
 	path = third_party/cutlass
 	url = https://gitcode.com/xLLM-AI/cutlass.git
@@ -45,7 +45,7 @@
 [submodule "third_party/xllm_atb_layers"]
 	path = third_party/xllm_atb_layers
 	url = https://gitcode.com/xLLM-AI/xllm_atb_layers.git
-	fetchRecurseSubmodules = false
+	fetchRecurseSubmodules = true
 [submodule "third_party/xxHash"]
 	path = third_party/xxHash
 	url = https://gitcode.com/xLLM-AI/xxHash.git
